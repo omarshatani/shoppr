@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "92024457014",
+    "project_id": "shoppr-1b445",
+    "storage_bucket": "shoppr-1b445.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:92024457014:android:41f08d9c115c543d4b9597",
+        "android_client_info": {
+          "package_name": "com.shoppr.app.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "92024457014-59llqmblrjb6up6u2ct1ck1b2gcnr6s1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shoppr.app.debug",
+            "certificate_hash": "c9dffa6c63b39d3c59d91b92c1d53ad7761fd39c"
+          }
+        },
+        {
+          "client_id": "92024457014-a1hi492eagloavf5b3lmsqin50o0pmk7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBffxo4TNIPPrdGvxwSifQNIn7RrkDkC78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "92024457014-a1hi492eagloavf5b3lmsqin50o0pmk7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

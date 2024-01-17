@@ -1,0 +1,92 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'androidx.navigation.safeargs'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'com.google.gms.google-services'
+}
+
+// Get debug keystore
+def debugKeystore = rootProject.file("debug-keystore.jks")
+// Get release keystore
+def releaseKeystore = rootProject.file("release-keystore.jks")
+
+// Initializes a new Properties() object called keystoreProperties.
+def debugKeystoreProperties = new Properties()
+def releaseKeystoreProperties = new Properties()
+
+// Loads the keystore.properties file into the keystoreProperties object.
+debugKeystoreProperties.load(new FileInputStream(debugKeystore))
+releaseKeystoreProperties.load(new FileInputStream(releaseKeystore))
+
+android {
+    signingConfigs {
+        debug {
+            storeFile file('D:\\Development\\2024\\debug-keystore.jks')
+            storePassword 'androiddebug'
+            keyAlias 'androiddebug'
+            keyPassword 'androiddebug'
+        }
+        release {
+        storeFile file('D:\\Development\\2024\\release-keystore.jks')
+            storePassword releaseKeystoreProperties['storePassword']
+            keyAlias releaseKeystoreProperties['keyAlias']
+            keyPassword releaseKeystoreProperties['keyPassword']
+        }
+    }
+    namespace 'com.shoppr.app'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.shoppr.app"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix '.debug'
+            signingConfig signingConfigs.debug
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    def nav_version = '2.6.0'
+    def lifecycle_version = "2.6.2"
+
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
+    androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
