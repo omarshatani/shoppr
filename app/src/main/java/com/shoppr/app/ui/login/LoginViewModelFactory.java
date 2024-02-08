@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.google.firebase.auth.FirebaseAuth;
 import com.shoppr.app.data.login.LoginDataSource;
 import com.shoppr.app.data.login.LoginRepository;
+import com.shoppr.app.data.login.adapter.UserAdapter;
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
@@ -19,7 +20,7 @@ public class LoginViewModelFactory implements ViewModelProvider.Factory {
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(LoginViewModel.class)) {
-            return (T) new LoginViewModel(LoginRepository.getInstance(new LoginDataSource(FirebaseAuth.getInstance())));
+            return (T) new LoginViewModel(LoginRepository.getInstance(new LoginDataSource(FirebaseAuth.getInstance()), new UserAdapter()));
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

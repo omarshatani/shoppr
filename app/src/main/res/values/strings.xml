@@ -12,4 +12,5 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="sign_out">Sign out</string>
+    <string name="default_web_client_id">92024457014-59llqmblrjb6up6u2ct1ck1b2gcnr6s1.apps.googleusercontent.com</string>
 </resources>

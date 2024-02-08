@@ -1,8 +1,10 @@
 package com.shoppr.app.ui.login;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,22 +14,30 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
 import com.shoppr.app.R;
 import com.shoppr.app.databinding.FragmentLoginBinding;
-
-import java.util.concurrent.ExecutionException;
+import com.shoppr.app.domain.login.model.LoggedInUserView;
 
 public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
     private FragmentLoginBinding binding;
+    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> loginViewModel.loginWithGoogle(result.getData())
+    );
+    private GoogleSignInClient signInClient;
 
     @Nullable
     @Override
@@ -46,9 +56,18 @@ public class LoginFragment extends Fragment {
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .requestProfile()
+                .build();
+        signInClient = GoogleSignIn.getClient(requireActivity(), signInOptions);
+
+
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
+        final SignInButton signInButton = binding.signGoogle;
         final ProgressBar loadingProgressBar = binding.loading;
 
         loginViewModel.getLoginFormState().observe(getViewLifecycleOwner(), loginFormState -> {
@@ -64,19 +83,19 @@ public class LoginFragment extends Fragment {
             }
         });
 
-        loginViewModel.getLoginResult().observe(getViewLifecycleOwner(), new Observer<LoginResult>() {
-            @Override
-            public void onChanged(@Nullable LoginResult loginResult) {
-                if (loginResult == null) {
-                    return;
-                }
-                loadingProgressBar.setVisibility(View.GONE);
-                if (loginResult.getError() != null) {
-                    showLoginFailed(loginResult.getError());
-                }
-                if (loginResult.getSuccess() != null) {
-                    updateUiWithUser(loginResult.getSuccess());
-                }
+        loginViewModel.getLoginResult().observe(getViewLifecycleOwner(), loginResult -> {
+            loadingProgressBar.setVisibility(View.GONE);
+
+            if (loginResult == null) {
+                showSignOutSuccess();
+                return;
+            }
+
+            if (loginResult.getError() != null) {
+                showLoginFailed(loginResult.getError());
+            }
+            if (loginResult.getSuccess() != null) {
+                updateUiWithUser(loginResult.getSuccess());
             }
         });
 
@@ -101,25 +120,19 @@ public class LoginFragment extends Fragment {
         passwordEditText.addTextChangedListener(afterTextChangedListener);
         passwordEditText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                try {
-                    loginViewModel.loginOrRegister(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
-                } catch (ExecutionException | InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                loginViewModel.loginOrRegister(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString());
             }
             return false;
         });
 
         loginButton.setOnClickListener(v -> {
             loadingProgressBar.setVisibility(View.VISIBLE);
-            try {
-                loginViewModel.loginOrRegister(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
-            } catch (ExecutionException | InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            loginViewModel.loginOrRegister(usernameEditText.getText().toString(),
+                    passwordEditText.getText().toString());
         });
+
+        signInButton.setOnClickListener(v -> signInWithGoogle());
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
@@ -130,11 +143,31 @@ public class LoginFragment extends Fragment {
         }
     }
 
-    private void showLoginFailed(@StringRes Integer errorString) {
+    private void showLoginFailed(String errorString) {
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(
                     getContext().getApplicationContext(),
                     errorString,
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void signInWithGoogle() {
+        // Ensure that signInClient is not null before using it
+        if (signInClient != null) {
+            Intent signInIntent = signInClient.getSignInIntent();
+            signInLauncher.launch(signInIntent);
+        } else {
+            Log.e("TAG", "GoogleSignInClient is null");
+        }
+    }
+
+    private void showSignOutSuccess() {
+        String signOutSuccess = "Signed out successfully";
+        if (getContext() != null && getContext().getApplicationContext() != null) {
+            Toast.makeText(
+                    getContext().getApplicationContext(),
+                    signOutSuccess,
                     Toast.LENGTH_LONG).show();
         }
     }
