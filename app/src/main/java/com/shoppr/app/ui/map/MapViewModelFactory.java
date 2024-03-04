@@ -14,7 +14,7 @@ public class MapViewModelFactory implements ViewModelProvider.Factory {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(LoginViewModel.class)) {
+        if (modelClass.isAssignableFrom(MapViewModel.class)) {
             return (T) new MapViewModel(MapRepository.getInstance(new MapDataSource(FirebaseFirestore.getInstance())));
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");

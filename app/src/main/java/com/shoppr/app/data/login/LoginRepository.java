@@ -3,16 +3,14 @@ package com.shoppr.app.data.login;
 import android.content.Intent;
 import android.util.Log;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
+import com.shoppr.app.data.common.Callback;
+import com.shoppr.app.data.common.Result;
 import com.shoppr.app.data.login.adapter.UserAdapter;
-import com.shoppr.app.data.login.model.LoggedInUser;
-import com.shoppr.app.domain.login.model.LoggedInUserView;
+import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.domain.login.model.LoginResult;
 
 /**
@@ -24,8 +22,6 @@ public class LoginRepository {
     private static volatile LoginRepository instance;
     private final LoginDataSource dataSource;
     private final UserAdapter userAdapter;
-    private final MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
-    private LoggedInUser user;
 
     // If user credentials will be cached in local storage, it is recommended it be encrypted
     // @see https://developer.android.com/training/articles/keystore
@@ -43,69 +39,51 @@ public class LoginRepository {
         return instance;
     }
 
-    public void logout() {
-        setLoggedInUser(null);
+    public void logout(Callback<Void> callback) {
         dataSource.logout();
+        callback.onSuccess(null);
     }
 
-    private void setLoggedInUser(FirebaseUser firebaseUser) {
-        LoggedInUser user = userAdapter.adaptUserFromFirebaseUser(firebaseUser);
-        this.user = user;
-        if (this.user != null) {
-            loginResult.postValue(new LoginResult(new LoggedInUserView(user.getDisplayName())));
-        } else {
-            loginResult.postValue(null);
-        }
-        // If user credentials will be cached in local storage, it is recommended it be encrypted
-        // @see https://developer.android.com/training/articles/keystore
-    }
-
-    public LoggedInUser getCurrentUser() {
-        return user;
-    }
-
-    public LiveData<LoginResult> getLoginResult() {
-        return loginResult;
-    }
-
-    public void login(String username, String password) {
+    public void login(final String username, final String password, final Callback<User> signInCallback, Callback<LoginResult> signupCallback) {
         Task<AuthResult> loginTask = dataSource.login(username, password);
-
         loginTask.addOnCompleteListener(result -> {
             if (result.isSuccessful()) {
                 FirebaseUser firebaseUser = result.getResult().getUser();
                 assert firebaseUser != null;
                 if (firebaseUser.isEmailVerified()) {
-                    setLoggedInUser(firebaseUser);
+                    signInCallback.onSuccess(new Result.Success<>(userAdapter.adaptUserFromFirebaseUser(firebaseUser)));
                 } else {
-                    loginResult.postValue(new LoginResult("Email not verified"));
+                    signInCallback.onError(new Exception("Email not validated"));
                 }
             } else {
-                this.signup(username, password);
+                this.signup(username, password, signupCallback);
             }
         });
     }
 
-    public void loginWithGoogle(Intent data) {
+    public void loginWithGoogle(Intent data, Callback<User> callback) {
         try {
             Task<AuthResult> loginTask = dataSource.loginWithGoogle(data);
-
             loginTask.addOnCompleteListener(result -> {
                 if (result.isSuccessful()) {
                     FirebaseUser firebaseUser = result.getResult().getUser();
-                    setLoggedInUser(firebaseUser);
+                    callback.onSuccess(new Result.Success<>(userAdapter.adaptUserFromFirebaseUser(firebaseUser)));
                 } else {
-                    loginResult.postValue(null);
+                    callback.onError(result.getException());
                 }
             });
         } catch (ApiException exception) {
             Log.e("ERROR SOCIAL SIGN IN", "DAMN");
-            loginResult.postValue(null);
+            callback.onError(exception);
         }
-
     }
 
-    private void signup(String username, String password) {
+    public User getCurrentUser() {
+        FirebaseUser firebaseUser = dataSource.getUser();
+        return userAdapter.adaptUserFromFirebaseUser(firebaseUser);
+    }
+
+    private void signup(String username, String password, Callback<LoginResult> callback) {
         Task<AuthResult> signupTask = dataSource.signup(username, password);
 
         signupTask.addOnCompleteListener(result -> {
@@ -113,13 +91,12 @@ public class LoginRepository {
                 FirebaseUser firebaseUser = result.getResult().getUser();
                 if (firebaseUser != null) {
                     firebaseUser.sendEmailVerification();
-                    loginResult.postValue(new LoginResult("An email verification has been sent"));
+                    callback.onComplete(new Result.Success<>(new LoginResult("An email verification has been sent")));
                 }
             } else {
-                setLoggedInUser(null);
+                callback.onComplete(new Result.Error<>(result.getException()));
             }
         });
     }
-
 
 }

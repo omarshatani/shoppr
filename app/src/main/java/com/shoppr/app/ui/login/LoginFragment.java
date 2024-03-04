@@ -20,6 +20,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -27,7 +29,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.shoppr.app.R;
 import com.shoppr.app.databinding.FragmentLoginBinding;
-import com.shoppr.app.domain.login.model.LoggedInUserView;
 
 public class LoginFragment extends Fragment {
 
@@ -67,6 +68,7 @@ public class LoginFragment extends Fragment {
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
+        final Button logoutButton = binding.signOut;
         final SignInButton signInButton = binding.signGoogle;
         final ProgressBar loadingProgressBar = binding.loading;
 
@@ -85,17 +87,15 @@ public class LoginFragment extends Fragment {
 
         loginViewModel.getLoginResult().observe(getViewLifecycleOwner(), loginResult -> {
             loadingProgressBar.setVisibility(View.GONE);
-
             if (loginResult == null) {
                 showSignOutSuccess();
                 return;
             }
-
             if (loginResult.getError() != null) {
                 showLoginFailed(loginResult.getError());
             }
             if (loginResult.getSuccess() != null) {
-                updateUiWithUser(loginResult.getSuccess());
+                navigateToMap(view);
             }
         });
 
@@ -133,14 +133,7 @@ public class LoginFragment extends Fragment {
         });
 
         signInButton.setOnClickListener(v -> signInWithGoogle());
-    }
-
-    private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
-        // TODO : initiate successful logged in experience
-        if (getContext() != null && getContext().getApplicationContext() != null) {
-            Toast.makeText(getContext().getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-        }
+        logoutButton.setOnClickListener(v -> signOut());
     }
 
     private void showLoginFailed(String errorString) {
@@ -162,6 +155,11 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    private void signOut() {
+        loginViewModel.logout();
+        signInClient.signOut();
+    }
+
     private void showSignOutSuccess() {
         String signOutSuccess = "Signed out successfully";
         if (getContext() != null && getContext().getApplicationContext() != null) {
@@ -170,6 +168,11 @@ public class LoginFragment extends Fragment {
                     signOutSuccess,
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void navigateToMap(View view) {
+        NavController navController = Navigation.findNavController(view);
+        navController.navigate(LoginFragmentDirections.actionLoginFragmentToMapFragment());
     }
 
     @Override
