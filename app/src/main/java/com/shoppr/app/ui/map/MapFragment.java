@@ -1,15 +1,11 @@
 package com.shoppr.app.ui.map;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +23,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.shoppr.app.R;
+import com.shoppr.app.data.database.Database;
+import com.shoppr.app.data.firebase.FirestoreDatasource;
 import com.shoppr.app.databinding.FragmentMapBinding;
 
 public class MapFragment extends Fragment {
@@ -37,20 +35,14 @@ public class MapFragment extends Fragment {
     };
     private MapViewModel mapViewModel;
     private FragmentMapBinding binding;
+    private Database db = Database.getInstance(new FirestoreDatasource());
     SupportMapFragment mapFragment;
 
-    @SuppressLint("MissingPermission")
     ActivityResultLauncher<String[]> locationPermissionRequest =
             registerForActivityResult(new ActivityResultContracts
                             .RequestMultiplePermissions(), result -> {
-                        Boolean fineLocationGranted = result.getOrDefault(
-                                Manifest.permission.ACCESS_FINE_LOCATION, false);
-                        Boolean coarseLocationGranted = result.getOrDefault(
-                                Manifest.permission.ACCESS_COARSE_LOCATION, false);
-                        mapViewModel.setPermission(Boolean.TRUE.equals(fineLocationGranted) || Boolean.TRUE.equals(coarseLocationGranted));
                     }
             );
-
 
     public static MapFragment newInstance() {
         return new MapFragment();
@@ -86,29 +78,49 @@ public class MapFragment extends Fragment {
         mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
             if (googleMap != null) {
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(requireActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
                     locationPermissionRequest.launch(permissions);
+                } else {
+                    initialiseMap();
                 }
             }
         });
 
-        mapViewModel.getPermission().observe(getViewLifecycleOwner(), permission -> {
-            if (!permission) {
-                return;
-            }
-            GoogleMap map = mapViewModel.getMap().getValue();
-            LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            assert map != null;
-            if (location != null) {
-                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-            }
-            map.setMyLocationEnabled(true);
-            map.getUiSettings().setMyLocationButtonEnabled(true);
-            map.getUiSettings().setZoomControlsEnabled(true);
-            map.getUiSettings().setZoomGesturesEnabled(true);
-        });
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!mapViewModel.getHasInitialised()) {
+            initialiseMap();
+        }
+    }
+
+    private void initialiseMap() {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        GoogleMap googleMap = mapViewModel.getMap().getValue();
+
+        if (googleMap == null) {
+            return;
+        }
+
+        googleMap.setMyLocationEnabled(true);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.getUiSettings().setZoomGesturesEnabled(true);
+
+        LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        if (location != null) {
+            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+        }
+
+        this.mapViewModel.setHasInitialised(true);
     }
 
 

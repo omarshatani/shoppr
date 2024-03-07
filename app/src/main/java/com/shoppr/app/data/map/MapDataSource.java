@@ -1,11 +1,11 @@
 package com.shoppr.app.data.map;
 
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.shoppr.app.data.database.Database;
 
 public class MapDataSource {
-    private FirebaseFirestore database;
+    private final Database database;
 
-    public MapDataSource(FirebaseFirestore database) {
+    public MapDataSource(Database database) {
         this.database = database;
     }
 }

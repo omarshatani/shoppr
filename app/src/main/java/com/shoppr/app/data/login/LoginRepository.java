@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
@@ -46,19 +47,28 @@ public class LoginRepository {
 
     public void login(final String username, final String password, final Callback<User> signInCallback, Callback<LoginResult> signupCallback) {
         Task<AuthResult> loginTask = dataSource.login(username, password);
-        loginTask.addOnCompleteListener(result -> {
-            if (result.isSuccessful()) {
-                FirebaseUser firebaseUser = result.getResult().getUser();
-                assert firebaseUser != null;
-                if (firebaseUser.isEmailVerified()) {
-                    signInCallback.onSuccess(new Result.Success<>(userAdapter.adaptUserFromFirebaseUser(firebaseUser)));
-                } else {
-                    signInCallback.onError(new Exception("Email not validated"));
-                }
-            } else {
-                this.signup(username, password, signupCallback);
-            }
-        });
+        loginTask
+                .addOnSuccessListener(result -> {
+                    FirebaseUser firebaseUser = result.getUser();
+                    assert firebaseUser != null;
+                    if (firebaseUser.isEmailVerified()) {
+                        signInCallback.onSuccess(new Result.Success<>(userAdapter.adaptUserFromFirebaseUser(firebaseUser)));
+                    } else {
+                        signInCallback.onError(new Exception("Email not validated"));
+                    }
+                })
+                .addOnFailureListener(exception -> {
+                    if (exception instanceof FirebaseAuthException) {
+                        String errorCode = ((FirebaseAuthException) exception).getErrorCode();
+
+                        if (errorCode.equals("ERROR_USER_NOT_FOUND")) {
+                            this.signup(username, password, signupCallback);
+                        }
+
+                        this.handleAuthhenticationException(errorCode, signInCallback);
+                    }
+                });
+
     }
 
     public void loginWithGoogle(Intent data, Callback<User> callback) {
@@ -97,6 +107,25 @@ public class LoginRepository {
                 callback.onComplete(new Result.Error<>(result.getException()));
             }
         });
+    }
+
+    private void handleAuthhenticationException(String errorCode, Callback<User> callback) {
+        switch (errorCode) {
+            case "ERROR_INVALID_CREDENTIAL":
+                // Invalid password
+                callback.onError(new Exception("Wrong credentials."));
+                // Show an error message to the user
+                break;
+            case "ERROR_NETWORK_REQUEST_FAILED":
+                // Network error
+                Log.e("SignIn", "Network error occurred.");
+                // Provide instructions to retry when network is available
+                break;
+            default:
+                // Handle other unexpected exceptions
+                Log.e("SignIn", "An error occurred: " + errorCode);
+                break;
+        }
     }
 
 }
