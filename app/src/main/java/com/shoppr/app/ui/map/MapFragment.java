@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.shoppr.app.R;
-import com.shoppr.app.data.database.Database;
-import com.shoppr.app.data.firebase.FirestoreDatasource;
+import com.shoppr.app.data.listing.model.Listing;
 import com.shoppr.app.databinding.FragmentMapBinding;
 
 public class MapFragment extends Fragment {
@@ -35,7 +35,6 @@ public class MapFragment extends Fragment {
     };
     private MapViewModel mapViewModel;
     private FragmentMapBinding binding;
-    private Database db = Database.getInstance(new FirestoreDatasource());
     SupportMapFragment mapFragment;
 
     ActivityResultLauncher<String[]> locationPermissionRequest =
@@ -74,7 +73,6 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mapViewModel = new ViewModelProvider(this, new MapViewModelFactory())
                 .get(MapViewModel.class);
-
         mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
             if (googleMap != null) {
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -84,7 +82,17 @@ public class MapFragment extends Fragment {
                 }
             }
         });
+        mapViewModel.getListings().observe(getViewLifecycleOwner(), listings -> {
+            if (listings == null) {
+                return;
+            }
+            for (Listing listing : listings) {
+                Log.d("LISTING", listing.toString());
+            }
+        });
 
+//        mapViewModel.addListings();
+//        mapViewModel.retrieveListings();
 
     }
 

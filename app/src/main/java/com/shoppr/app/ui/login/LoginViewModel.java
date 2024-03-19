@@ -3,6 +3,7 @@ package com.shoppr.app.ui.login;
 import android.content.Intent;
 import android.util.Patterns;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -37,8 +38,8 @@ public class LoginViewModel extends ViewModel {
     public void loginOrRegister(String username, String password) {
         loginRepository.login(username, password, new Callback<User>() {
             @Override
-            public void onSuccess(Result<User> result) {
-                User loggedInUser = ((Result.Success<User>) result).getData();
+            public void onSuccess(Result.Success<User> result) {
+                User loggedInUser = result.getData();
                 loginResult.postValue(new LoginResult(new LoggedInUserView(loggedInUser.getName())));
             }
 
@@ -46,12 +47,16 @@ public class LoginViewModel extends ViewModel {
             public void onError(Exception exception) {
                 loginResult.postValue(new LoginResult(exception.getMessage()));
             }
-        }, result -> {
-            if (result instanceof Result.Success) {
-                loginResult.postValue(((Result.Success<LoginResult>) result).getData());
+        }, new Callback<LoginResult>() {
+            @Override
+            public void onSuccess(@Nullable Result.Success<LoginResult> result) {
+                assert result != null;
+                loginResult.postValue(result.getData());
             }
-            if (result instanceof Result.Error) {
-                loginResult.postValue(new LoginResult(((Result.Error<LoginResult>) result).getError().getMessage()));
+
+            @Override
+            public void onError(Exception exception) {
+                loginResult.postValue(new LoginResult(exception.getMessage()));
             }
         });
     }
@@ -59,8 +64,8 @@ public class LoginViewModel extends ViewModel {
     public void loginWithGoogle(Intent data) {
         loginRepository.loginWithGoogle(data, new Callback<User>() {
             @Override
-            public void onSuccess(Result<User> result) {
-                User loggedInUser = ((Result.Success<User>) result).getData();
+            public void onSuccess(Result.Success<User> result) {
+                User loggedInUser = result.getData();
                 loginResult.setValue(new LoginResult(new LoggedInUserView(loggedInUser.getName())));
             }
 

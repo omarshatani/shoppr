@@ -1,27 +1,72 @@
 package com.shoppr.app.data.listing.model;
 
+import java.util.ArrayList;
+
 public class Listing {
-    private String test1;
-    private String test2;
+    private String name;
+    private String description;
+    private String userId;
+    private ArrayList<String> imageUrls;
+    private double price;
+    private String currency;
 
-    public Listing(String test1, String test2) {
-        this.test1 = test1;
-        this.test2 = test2;
+    public Listing() {
     }
 
-    public String getTest1() {
-        return test1;
+    public Listing(String name, String description, String userId, ArrayList<String> imageUrls, double price, String currency) {
+        this.name = name;
+        this.description = description;
+        this.userId = userId;
+        this.imageUrls = imageUrls;
+        this.price = price;
+        this.currency = currency;
     }
 
-    public void setTest1(String test1) {
-        this.test1 = test1;
+    public String getName() {
+        return name;
     }
 
-    public String getTest2() {
-        return test2;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setTest2(String test2) {
-        this.test2 = test2;
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public ArrayList<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(ArrayList<String> imageUrls) {
+        this.imageUrls = imageUrls;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

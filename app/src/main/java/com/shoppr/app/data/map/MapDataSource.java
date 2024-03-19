@@ -1,11 +1,36 @@
 package com.shoppr.app.data.map;
 
-import com.shoppr.app.data.database.Database;
+import androidx.annotation.Nullable;
+
+import com.shoppr.app.data.common.Callback;
+import com.shoppr.app.data.common.Result;
+import com.shoppr.app.data.listing.model.Listing;
+import com.shoppr.app.data.listing.model.ListingDatabase;
+
+import java.util.ArrayList;
 
 public class MapDataSource {
-    private final Database database;
+    private final ListingDatabase database;
 
-    public MapDataSource(Database database) {
+    public MapDataSource(ListingDatabase database) {
         this.database = database;
+    }
+
+    public void getListings(Callback<ArrayList<Listing>> successCallback, Callback<Exception> errorCallback) {
+        database.get(new Callback<ArrayList<Listing>>() {
+            @Override
+            public void onSuccess(@Nullable Result.Success<ArrayList<Listing>> result) {
+                successCallback.onSuccess(result);
+            }
+
+            @Override
+            public void onError(@Nullable Exception exception) {
+                errorCallback.onError(exception);
+            }
+        });
+    }
+
+    public void addListings(Object data, Callback<Void> callback) {
+        database.add(data).addOnSuccessListener(unused -> callback.onSuccess(null));
     }
 }
