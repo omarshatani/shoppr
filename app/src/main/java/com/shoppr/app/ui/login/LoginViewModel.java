@@ -1,6 +1,7 @@
 package com.shoppr.app.ui.login;
 
 import android.content.Intent;
+import android.util.Log;
 import android.util.Patterns;
 
 import androidx.annotation.Nullable;
@@ -78,6 +79,7 @@ public class LoginViewModel extends ViewModel {
 
     public void logout() {
         loginRepository.logout(result -> {
+            Log.d("LOGOUT", "SUCCESS");
         });
     }
 

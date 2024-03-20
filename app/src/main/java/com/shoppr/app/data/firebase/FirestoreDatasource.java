@@ -5,6 +5,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Map;
+
 public class FirestoreDatasource {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CollectionReference reference;
@@ -21,8 +23,16 @@ public class FirestoreDatasource {
         return reference.document(document).set(data);
     }
 
-    public Task<QuerySnapshot> get() {
+    public Task<QuerySnapshot> getAll() {
         return reference.get();
+    }
+
+    public Task<QuerySnapshot> get(String field, String value) {
+        return reference.whereEqualTo(field, value).get();
+    }
+
+    public Task<Void> update(Map<String, Object> data, String document) {
+        return reference.document(document).update(data);
     }
 
 }

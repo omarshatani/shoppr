@@ -1,7 +1,6 @@
 package com.shoppr.app.data.login.adapter;
 
 import com.google.firebase.auth.FirebaseUser;
-import com.shoppr.app.data.login.model.LoggedInUser;
 import com.shoppr.app.data.user.model.User;
 
 public class UserAdapter {
@@ -13,6 +12,6 @@ public class UserAdapter {
         if (user == null) {
             return null;
         }
-        return new User(user.getDisplayName(), user.getEmail(), user.getPhoneNumber());
+        return new User(user.getUid(), user.getDisplayName(), user.getEmail(), user.getPhoneNumber());
     }
 }

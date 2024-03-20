@@ -4,8 +4,8 @@ import androidx.annotation.Nullable;
 
 import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
+import com.shoppr.app.data.listing.ListingDatabase;
 import com.shoppr.app.data.listing.model.Listing;
-import com.shoppr.app.data.listing.model.ListingDatabase;
 
 import java.util.ArrayList;
 
@@ -17,7 +17,7 @@ public class MapDataSource {
     }
 
     public void getListings(Callback<ArrayList<Listing>> successCallback, Callback<Exception> errorCallback) {
-        database.get(new Callback<ArrayList<Listing>>() {
+        database.getAll(new Callback<ArrayList<Listing>>() {
             @Override
             public void onSuccess(@Nullable Result.Success<ArrayList<Listing>> result) {
                 successCallback.onSuccess(result);

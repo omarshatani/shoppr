@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.shoppr.app.data.listing.model.ListingDatabase;
+import com.shoppr.app.data.listing.ListingDatabase;
 import com.shoppr.app.data.map.MapDataSource;
 import com.shoppr.app.data.map.MapRepository;
 

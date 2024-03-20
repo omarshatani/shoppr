@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -18,6 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,7 +28,15 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.Listing;
+import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentMapBinding;
+import com.shoppr.app.ui.login.LoginViewModel;
+import com.shoppr.app.ui.login.LoginViewModelFactory;
+import com.shoppr.app.ui.user.UserViewModel;
+import com.shoppr.app.ui.user.UserViewModelFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapFragment extends Fragment {
 
@@ -34,6 +45,8 @@ public class MapFragment extends Fragment {
             Manifest.permission.ACCESS_COARSE_LOCATION
     };
     private MapViewModel mapViewModel;
+    private LoginViewModel loginViewModel;
+    private UserViewModel userViewModel;
     private FragmentMapBinding binding;
     SupportMapFragment mapFragment;
 
@@ -73,6 +86,11 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mapViewModel = new ViewModelProvider(this, new MapViewModelFactory())
                 .get(MapViewModel.class);
+        loginViewModel = new ViewModelProvider(requireActivity(), new LoginViewModelFactory()).get(LoginViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory()).get(UserViewModel.class);
+
+        final Button logoutCta = binding.logoutCta;
+
         mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
             if (googleMap != null) {
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -89,6 +107,12 @@ public class MapFragment extends Fragment {
             for (Listing listing : listings) {
                 Log.d("LISTING", listing.toString());
             }
+        });
+
+        logoutCta.setOnClickListener(v -> {
+            loginViewModel.logout();
+            NavDirections directions = MapFragmentDirections.actionMapFragmentToLoginFragment();
+            Navigation.findNavController(v).navigate(directions);
         });
 
 //        mapViewModel.addListings();
@@ -126,6 +150,11 @@ public class MapFragment extends Fragment {
         if (location != null) {
             LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
+            User currentUser = loginViewModel.getCurrentUser();
+            Map<String, Object> map = new HashMap<>();
+            map.put("latitude", userLocation.latitude);
+            map.put("longitude", userLocation.longitude);
+            userViewModel.updateUser(map, currentUser.getUuid());
         }
 
         this.mapViewModel.setHasInitialised(true);

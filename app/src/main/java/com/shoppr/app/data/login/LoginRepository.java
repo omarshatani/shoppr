@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
 import com.shoppr.app.data.login.adapter.UserAdapter;
+import com.shoppr.app.data.user.UserDatabase;
 import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.domain.login.model.LoginResult;
 
@@ -23,19 +24,21 @@ public class LoginRepository {
     private static volatile LoginRepository instance;
     private final LoginDataSource dataSource;
     private final UserAdapter userAdapter;
+    private final UserDatabase userDatabase;
 
     // If user credentials will be cached in local storage, it is recommended it be encrypted
     // @see https://developer.android.com/training/articles/keystore
 
     // private constructor : singleton access
-    private LoginRepository(LoginDataSource dataSource, UserAdapter userAdapter) {
+    private LoginRepository(LoginDataSource dataSource, UserAdapter userAdapter, UserDatabase userDatabase) {
         this.dataSource = dataSource;
         this.userAdapter = userAdapter;
+        this.userDatabase = userDatabase;
     }
 
-    public static LoginRepository getInstance(LoginDataSource dataSource, UserAdapter userAdapter) {
+    public static LoginRepository getInstance(LoginDataSource dataSource, UserAdapter userAdapter, UserDatabase userDatabase) {
         if (instance == null) {
-            instance = new LoginRepository(dataSource, userAdapter);
+            instance = new LoginRepository(dataSource, userAdapter, userDatabase);
         }
         return instance;
     }
@@ -77,6 +80,8 @@ public class LoginRepository {
             loginTask.addOnCompleteListener(result -> {
                 if (result.isSuccessful()) {
                     FirebaseUser firebaseUser = result.getResult().getUser();
+                    assert firebaseUser != null;
+                    userDatabase.add(firebaseUser.getUid(), new User(firebaseUser.getUid(), firebaseUser.getDisplayName(), firebaseUser.getEmail(), firebaseUser.getPhoneNumber()));
                     callback.onSuccess(new Result.Success<>(userAdapter.adaptUserFromFirebaseUser(firebaseUser)));
                 } else {
                     callback.onError(result.getException());
@@ -101,6 +106,7 @@ public class LoginRepository {
                 FirebaseUser firebaseUser = result.getResult().getUser();
                 if (firebaseUser != null) {
                     firebaseUser.sendEmailVerification();
+                    userDatabase.add(firebaseUser.getUid(), new User(firebaseUser.getUid(), firebaseUser.getDisplayName(), firebaseUser.getEmail(), firebaseUser.getPhoneNumber()));
                     callback.onComplete(new Result.Success<>(new LoginResult("An email verification has been sent")));
                 }
             } else {

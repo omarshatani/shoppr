@@ -1,4 +1,4 @@
-package com.shoppr.app.data.listing.model;
+package com.shoppr.app.data.listing;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -6,6 +6,7 @@ import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
 import com.shoppr.app.data.database.Database;
 import com.shoppr.app.data.firebase.FirestoreDatasource;
+import com.shoppr.app.data.listing.model.Listing;
 
 import java.util.ArrayList;
 
@@ -31,8 +32,12 @@ public class ListingDatabase extends Database<Listing> {
     }
 
     @Override
-    public void get(Callback<ArrayList<Listing>> callback) {
-        dataSource.get().addOnCompleteListener(task -> {
+    public void add(String id, Object data) {
+    }
+
+    @Override
+    public void getAll(Callback<ArrayList<Listing>> callback) {
+        dataSource.getAll().addOnCompleteListener(task -> {
             ArrayList<Listing> elements = new ArrayList<>();
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {

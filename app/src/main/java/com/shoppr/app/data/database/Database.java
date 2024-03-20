@@ -8,5 +8,7 @@ import java.util.ArrayList;
 public abstract class Database<T> {
     public abstract Task<Void> add(Object data);
 
-    public abstract void get(Callback<ArrayList<T>> callback);
+    public abstract void add(String id, Object data);
+
+    public abstract void getAll(Callback<ArrayList<T>> callback);
 }
