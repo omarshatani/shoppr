@@ -14,7 +14,6 @@ import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
 import com.shoppr.app.data.login.LoginRepository;
 import com.shoppr.app.data.user.model.User;
-import com.shoppr.app.domain.login.model.LoggedInUserView;
 import com.shoppr.app.domain.login.model.LoginFormState;
 import com.shoppr.app.domain.login.model.LoginResult;
 
@@ -41,7 +40,7 @@ public class LoginViewModel extends ViewModel {
             @Override
             public void onSuccess(Result.Success<User> result) {
                 User loggedInUser = result.getData();
-                loginResult.postValue(new LoginResult(new LoggedInUserView(loggedInUser.getName())));
+                loginResult.postValue(new LoginResult(loggedInUser));
             }
 
             @Override
@@ -67,7 +66,7 @@ public class LoginViewModel extends ViewModel {
             @Override
             public void onSuccess(Result.Success<User> result) {
                 User loggedInUser = result.getData();
-                loginResult.setValue(new LoginResult(new LoggedInUserView(loggedInUser.getName())));
+                loginResult.setValue(new LoginResult(loggedInUser));
             }
 
             @Override
@@ -78,9 +77,7 @@ public class LoginViewModel extends ViewModel {
     }
 
     public void logout() {
-        loginRepository.logout(result -> {
-            Log.d("LOGOUT", "SUCCESS");
-        });
+        loginRepository.logout(result -> Log.d("LOGOUT", "SUCCESS"));
     }
 
     public void loginDataChanged(String username, String password) {

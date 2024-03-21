@@ -33,7 +33,6 @@ public class User {
         this.longitude = longitude;
     }
 
-
     public User(String uuid, String name, String email, String phoneNumber, @Nullable Address address) {
         this.uuid = uuid;
         this.name = name;

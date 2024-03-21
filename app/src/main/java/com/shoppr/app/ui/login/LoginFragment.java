@@ -20,19 +20,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
+import com.shoppr.app.MainActivityViewModel;
 import com.shoppr.app.R;
+import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentLoginBinding;
 
 public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
+    private MainActivityViewModel mainActivityViewModel;
     private FragmentLoginBinding binding;
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -56,6 +57,7 @@ public class LoginFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
+        mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
 
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -92,10 +94,12 @@ public class LoginFragment extends Fragment {
                 return;
             }
             if (loginResult.getError() != null) {
-                showLoginFailed(loginResult.getError());
+                showToast(loginResult.getError());
             }
-            if (loginResult.getSuccess() != null) {
-                navigateToMap(view);
+            if (loginResult.getUser() != null) {
+                User user = loginResult.getUser();
+                showToast(String.format("Welcome %s !", user.getName()));
+                mainActivityViewModel.setUser(user);
             }
         });
 
@@ -136,11 +140,11 @@ public class LoginFragment extends Fragment {
         logoutButton.setOnClickListener(v -> signOut());
     }
 
-    private void showLoginFailed(String errorString) {
+    private void showToast(String text) {
         if (getContext() != null && getContext().getApplicationContext() != null) {
             Toast.makeText(
                     getContext().getApplicationContext(),
-                    errorString,
+                    text,
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -158,6 +162,7 @@ public class LoginFragment extends Fragment {
     private void signOut() {
         loginViewModel.logout();
         signInClient.signOut();
+        showSignOutSuccess();
     }
 
     private void showSignOutSuccess() {
@@ -168,11 +173,6 @@ public class LoginFragment extends Fragment {
                     signOutSuccess,
                     Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void navigateToMap(View view) {
-        NavController navController = Navigation.findNavController(view);
-        navController.navigate(LoginFragmentDirections.actionLoginFragmentToMapFragment());
     }
 
     @Override

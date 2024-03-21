@@ -19,13 +19,12 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.shoppr.app.MainActivityViewModel;
 import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.Listing;
 import com.shoppr.app.data.user.model.User;
@@ -46,6 +45,7 @@ public class MapFragment extends Fragment {
     };
     private MapViewModel mapViewModel;
     private LoginViewModel loginViewModel;
+    private MainActivityViewModel mainActivityViewModel;
     private UserViewModel userViewModel;
     private FragmentMapBinding binding;
     SupportMapFragment mapFragment;
@@ -55,10 +55,6 @@ public class MapFragment extends Fragment {
                             .RequestMultiplePermissions(), result -> {
                     }
             );
-
-    public static MapFragment newInstance() {
-        return new MapFragment();
-    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -74,9 +70,7 @@ public class MapFragment extends Fragment {
                 .add(R.id.map, mapFragment)
                 .commit();
 
-        mapFragment.getMapAsync(googleMap -> {
-            mapViewModel.setMap(googleMap);
-        });
+        mapFragment.getMapAsync(googleMap -> mapViewModel.setMap(googleMap));
 
         return binding.getRoot();
     }
@@ -88,6 +82,7 @@ public class MapFragment extends Fragment {
                 .get(MapViewModel.class);
         loginViewModel = new ViewModelProvider(requireActivity(), new LoginViewModelFactory()).get(LoginViewModel.class);
         userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory()).get(UserViewModel.class);
+        mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
 
         final Button logoutCta = binding.logoutCta;
 
@@ -111,8 +106,7 @@ public class MapFragment extends Fragment {
 
         logoutCta.setOnClickListener(v -> {
             loginViewModel.logout();
-            NavDirections directions = MapFragmentDirections.actionMapFragmentToLoginFragment();
-            Navigation.findNavController(v).navigate(directions);
+            mainActivityViewModel.setUser(null);
         });
 
 //        mapViewModel.addListings();
