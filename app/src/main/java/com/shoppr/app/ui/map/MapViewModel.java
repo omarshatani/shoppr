@@ -7,10 +7,13 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.listing.model.Listing;
 import com.shoppr.app.data.map.MapRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapViewModel extends ViewModel {
     // TODO: Implement the ViewModel
@@ -43,8 +46,24 @@ public class MapViewModel extends ViewModel {
         this.hasInitialised = value;
     }
 
-    public void addListings() {
-        mapRepository.addListings(new Listing("Item", "Description", "anId", new ArrayList<>(), 10.2, "EUR"), result -> Log.d("ADDED", "YES"));
+    public void addListings(ArrayList<Listing> listings) {
+        for (Listing listing : listings) {
+            Map<String, Object> listingsData = new HashMap<>();
+            listingsData.put("name", listing.getName());
+            listingsData.put("description", listing.getDescription());
+            listingsData.put("userId", listing.getUserId());
+            listingsData.put("imageUrls", listing.getImageUrls());
+            listingsData.put("price", listing.getPrice());
+            listingsData.put("currency", listing.getCurrency());
+
+            this.addListing(listingsData, unused -> {
+                Log.d("SUCCESS", "ADD");
+            });
+        }
+    }
+
+    private void addListing(Object data, Callback<Void> callback) {
+        mapRepository.addListing(data, callback);
     }
 
     public void retrieveListings() {

@@ -1,6 +1,7 @@
 package com.shoppr.app.data.listing;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
@@ -27,12 +28,13 @@ public class ListingDatabase extends Database<Listing> {
     }
 
     @Override
-    public Task<Void> add(Object data) {
-        return dataSource.add(data, DOCUMENT);
+    public Task<DocumentReference> add(Object data) {
+        return dataSource.add(data);
     }
 
     @Override
     public void add(String id, Object data) {
+        dataSource.add(data, id);
     }
 
     @Override

@@ -30,7 +30,7 @@ public class MapDataSource {
         });
     }
 
-    public void addListings(Object data, Callback<Void> callback) {
+    public void addListing(Object data, Callback<Void> callback) {
         database.add(data).addOnSuccessListener(unused -> callback.onSuccess(null));
     }
 }

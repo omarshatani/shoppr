@@ -3,6 +3,7 @@ package com.shoppr.app.ui.map;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -29,11 +30,15 @@ import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.Listing;
 import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentMapBinding;
+import com.shoppr.app.domain.utils.JsonUtils;
 import com.shoppr.app.ui.login.LoginViewModel;
 import com.shoppr.app.ui.login.LoginViewModelFactory;
 import com.shoppr.app.ui.user.UserViewModel;
 import com.shoppr.app.ui.user.UserViewModelFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,16 +56,13 @@ public class MapFragment extends Fragment {
     SupportMapFragment mapFragment;
 
     ActivityResultLauncher<String[]> locationPermissionRequest =
-            registerForActivityResult(new ActivityResultContracts
-                            .RequestMultiplePermissions(), result -> {
-                    }
-            );
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+            });
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentMapBinding.inflate(inflater, container, false);
-
         mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         assert mapFragment != null;
@@ -86,6 +88,8 @@ public class MapFragment extends Fragment {
 
         final Button logoutCta = binding.logoutCta;
 
+        mapViewModel.retrieveListings();
+
         mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
             if (googleMap != null) {
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -99,8 +103,12 @@ public class MapFragment extends Fragment {
             if (listings == null) {
                 return;
             }
-            for (Listing listing : listings) {
-                Log.d("LISTING", listing.toString());
+            if (listings.isEmpty()) {
+                mapViewModel.addListings(this.convertJsonMockToListings());
+            } else {
+                for (Listing listing : listings) {
+                    Log.d("LISTING", listing.toString());
+                }
             }
         });
 
@@ -109,8 +117,6 @@ public class MapFragment extends Fragment {
             mainActivityViewModel.setUser(null);
         });
 
-//        mapViewModel.addListings();
-//        mapViewModel.retrieveListings();
 
     }
 
@@ -152,6 +158,23 @@ public class MapFragment extends Fragment {
         }
 
         this.mapViewModel.setHasInitialised(true);
+    }
+
+    private ArrayList<Listing> convertJsonMockToListings() {
+        AssetManager assetManager = requireActivity().getAssets();
+        String json;
+        try {
+            InputStream inputStream = assetManager.open("LISTINGS_MOCK.json");
+            StringBuilder builder = new StringBuilder();
+            int data;
+            while ((data = inputStream.read()) != -1) {
+                builder.append((char) data);
+            }
+            json = builder.toString();
+            return JsonUtils.convertJsonToArrayList(json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

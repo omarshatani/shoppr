@@ -2,6 +2,7 @@ package com.shoppr.app.data.firebase;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -19,8 +20,12 @@ public class FirestoreDatasource {
         this.reference = db.collection(collection);
     }
 
-    public Task<Void> add(Object data, String document) {
-        return reference.document(document).set(data);
+    public void add(Object data, String document) {
+        reference.document(document).set(data);
+    }
+
+    public Task<DocumentReference> add(Object data) {
+        return reference.add(data);
     }
 
     public Task<QuerySnapshot> getAll() {

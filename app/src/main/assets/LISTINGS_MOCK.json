@@ -1,0 +1,263 @@
+[
+  {
+    "imageUrls": [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqxoj2TOSgONqWeXXfPglg2bpqyX5omSg8qPCgdJPmqA&s"
+    ],
+    "name": "Wireless Bluetooth Earbuds",
+    "description": "High-quality wireless earbuds with noise-cancelling technology.",
+    "price": 39.99,
+    "currency": "EUR",
+    "userId": "Nu0kfBn72gKvsZqJMTD",
+    "category": "Electronics",
+    "latitude": 37.7749,
+    "longitude": -122.4194
+  },
+  {
+    "imageUrls": [
+      "https://data.filippomarchesani.com/images/galleries/24966/A20-T-Shirt-in-cotone-POLO-RALPH-LAUREN-710839046004-3.JPG"
+    ],
+    "name": "Soft Cotton T-Shirt",
+    "description": "Comfortable and stylish cotton t-shirt for everyday wear.",
+    "price": 19.99,
+    "currency": "EUR",
+    "userId": "Nu0kj_sYMW1rbWchBir",
+    "category": "Clothing",
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  },
+  {
+    "imageUrls": [
+      "https://m.media-amazon.com/images/I/61gYTq0mpsL._AC_UF1000,1000_QL80_.jpg"
+    ],
+    "name": "Smart Fitness Tracker",
+    "description": "Track your daily activities, heart rate, and sleep with this smart fitness tracker.",
+    "price": 79.99,
+    "currency": "EUR",
+    "userId": "Nu0klCa27CMLBSVsmIc",
+    "category": "Electronics",
+    "latitude": 51.5074,
+    "longitude": -0.1278
+  },
+  {
+    "imageUrls": [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaPzNPLcAlUsKQZyAB8DK6CJm1x0VA2GgmpvnaIE3txw&s"
+    ],
+    "name": "Leather Crossbody Bag",
+    "description": "Elegant leather crossbody bag for carrying essentials.",
+    "price": 49.99,
+    "currency": "EUR",
+    "userId": "Nu0knR3T4Ud1yqKmkxw",
+    "category": "Fashion Accessories",
+    "latitude": 48.8566,
+    "longitude": 2.3522
+  },
+  {
+    "imageUrls": [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD4si6pv2ZygaL6qzVD842pARmjB_6UGiEsZwEwbcpgw&s"
+    ],
+    "name": "Stainless Steel Watch",
+    "description": "Classic stainless steel watch for a sophisticated look.",
+    "price": 129.99,
+    "currency": "EUR",
+    "userId": "Nu0kooXOzV9tSEMRj2T",
+    "category": "Watches",
+    "latitude": 34.0522,
+    "longitude": -118.2437
+  },
+  {
+    "imageUrls": [
+      "https://m.media-amazon.com/images/I/71K00XB3Z7L._AC_UF894,1000_QL80_.jpg"
+    ],
+    "name": "Portable External Battery",
+    "description": "Compact and high-capacity external battery to charge your devices on the go.",
+    "price": 29.99,
+    "currency": "EUR",
+    "userId": "Nu0kooXOzV9tSEMRj2T",
+    "category": "Electronics",
+    "latitude": 41.3851,
+    "longitude": 2.1734
+  },
+  {
+    "imageUrls": [
+      "https://www.barazzoni.it/cache/media/2023/02/29292400_543.jpg/75f8c0970627d9528c4c71525075ecc3.jpg"
+    ],
+    "name": "Ceramic Non-Stick Cookware Set",
+    "description": "Durable and easy-to-clean cookware set for your kitchen.",
+    "price": 89.99,
+    "currency": "EUR",
+    "userId": "Nu0krqE8ykTHl1eh4sY",
+    "category": "Home & Kitchen",
+    "latitude": 52.5200,
+    "longitude": 13.4050
+  },
+  {
+    "imageUrls": [
+      "https://www.wiredzone.it/55448-medium_default/glorious-pc-gaming-race-model-o-wireless-gaming-mouse-black-matt.jpg"
+    ],
+    "name": "Wireless Gaming Mouse",
+    "description": "High-performance wireless gaming mouse with customizable buttons.",
+    "price": 59.99,
+    "currency": "EUR",
+    "userId": "Nu0ktGjdSBHrp38EmpR",
+    "category": "Gaming",
+    "latitude": 59.3293,
+    "longitude": 18.0686
+  },
+  {
+    "imageUrls": [
+      "https://cdn.staticans.com/image/tr:e-sharpen-01,h-1500,w-1500,cm-pad_resize/data/Optimum-Nutrition/19-May-2023/1115039_1.jpg"
+    ],
+    "name": "Plant-Based Protein Powder",
+    "description": "Delicious and nutritious plant-based protein powder for post-workout recovery.",
+    "price": 34.99,
+    "currency": "EUR",
+    "userId": "Nu0kfBn72gKvsZqJMTD",
+    "category": "Health & Wellness",
+    "latitude": 55.7558,
+    "longitude": 37.6173
+  },
+  {
+    "imageUrls": [
+      "https://images.squarespace-cdn.com/content/v1/59dada8a03596eb5955009db/1690341720856-2BD7Y439Q6E614WVDOXX/1.jpg?format=2500w"
+    ],
+    "name": "Rustic Wooden Bookshelf",
+    "description": "Sturdy wooden bookshelf with a rustic design for your home library.",
+    "price": 149.99,
+    "currency": "EUR",
+    "userId": "Nu0kufcnHujYTjSoTsi",
+    "category": "Furniture",
+    "latitude": 35.6895,
+    "longitude": 139.6917
+  },
+  {
+    "imageUrls": [
+      "https://i.pcmag.com/imagery/reviews/04krZvvKFLwbEDvWxwPsfTH-5..v1652284815.jpg"
+    ],
+    "name": "Wireless Noise-Cancelling Headphones",
+    "description": "Immerse yourself in music with these wireless noise-cancelling headphones.",
+    "price": 129.99,
+    "currency": "EUR",
+    "userId": "Nu0kxLCAKm2Qnit5iN6",
+    "category": "Electronics",
+    "latitude": 30.0444,
+    "longitude": 31.2357
+  },
+  {
+    "imageUrls": [
+      "https://www.cameralabs.com/wp-content/uploads/2019/08/canon-eos-90d-hero-1.jpg"
+    ],
+    "name": "Professional DSLR Camera",
+    "description": "Capture stunning photos with this high-resolution DSLR camera.",
+    "price": 799.99,
+    "currency": "EUR",
+    "userId": "Nu0kytXB81Cneem8nw1",
+    "category": "Electronics",
+    "latitude": 37.7749,
+    "longitude": -122.4194
+  },
+  {
+    "imageUrls": [
+      "https://beautifulbydrew.com/cdn/shop/products/toaster-ls_1200x1200.jpg?v=1615948955"
+    ],
+    "name": "Quartz Countertop Toaster Oven",
+    "description": "Convenient countertop toaster oven for quick and easy cooking.",
+    "price": 89.99,
+    "currency": "EUR",
+    "userId": "Nu0l1Fl9xf47woOmBMa",
+    "category": "Home Appliances",
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  },
+  {
+    "imageUrls": [
+      "https://us.barkershoes.com/cdn/shop/collections/mens-brogues_1024x700_crop_center.jpg?v=1566553151"
+    ],
+    "name": "Men's Leather Dress Shoes",
+    "description": "Elegant leather dress shoes for formal occasions.",
+    "price": 89.99,
+    "currency": "EUR",
+    "userId": "Nu0l2aV0HyISCEzoqyw",
+    "category": "Shoes",
+    "latitude": 51.5074,
+    "longitude": -0.1278
+  },
+  {
+    "imageUrls": [
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtnrOrPRV1ik3J_BWbHPqDB1CEmBDvdJJAX72XaAr_7w&s"
+    ],
+    "name": "Women's Athletic Sneakers",
+    "description": "Comfortable and stylish athletic sneakers for women.",
+    "price": 59.99,
+    "currency": "EUR",
+    "userId": "Nu0l3nIzSquakN9Cy3j",
+    "category": "Shoes",
+    "latitude": 48.8566,
+    "longitude": 2.3522
+  },
+  {
+    "imageUrls": [
+      "https://vonbaer.com/cdn/shop/products/exquisite-slim-leather-laptop-bag-solid-brown-front-view-with-model-1_2048x2048.jpg?v=1695390122"
+    ],
+    "name": "Leather Laptop Bag",
+    "description": "Stylish leather laptop bag to carry your tech essentials.",
+    "price": 69.99,
+    "currency": "EUR",
+    "userId": "Nu0l4xZhJVMN91gqBAY",
+    "category": "Fashion Accessories",
+    "latitude": 34.0522,
+    "longitude": -118.2437
+  },
+  {
+    "imageUrls": [
+      "https://cdn.shopify.com/s/files/1/2100/2891/products/v08jLYnE.jpg"
+    ],
+    "name": "1000-Piece Jigsaw Puzzle",
+    "description": "Challenge yourself with this beautiful 1000-piece jigsaw puzzle.",
+    "price": 19.99,
+    "currency": "EUR",
+    "userId": "Nu0l64xoUKlGZKNmJ2N",
+    "category": "Toys & Games",
+    "latitude": 41.3851,
+    "longitude": 2.1734
+  },
+  {
+    "imageUrls": [
+      "https://www.trysuri.com/cdn/shop/products/MorningWavesHand_600x.jpg?v=1686215027"
+    ],
+    "name": "Electric Toothbrush",
+    "description": "Keep your teeth clean with this efficient electric toothbrush.",
+    "price": 49.99,
+    "currency": "EUR",
+    "userId": "Nu0l7CukMyrYZiXOdNo",
+    "category": "Health & Personal Care",
+    "latitude": 52.5200,
+    "longitude": 13.4050
+  },
+  {
+    "imageUrls": [
+      "https://www.iglm.store/380739-large_default/polaroid-go-red-garanzia-ufficiale-2-anni.jpg"
+    ],
+    "name": "Vintage Polaroid Camera",
+    "description": "Capture retro-style instant photos with this vintage Polaroid camera.",
+    "price": 79.99,
+    "currency": "EUR",
+    "userId": "Nu0l8kIVKjeF81dZX7J",
+    "category": "Electronics",
+    "latitude": 59.3293,
+    "longitude": 18.0686
+  },
+  {
+    "imageUrls": [
+      "https://watchbox-blog.imgix.net/wp-content/uploads/2021/02/Panerai-Divers-Watch-In-Water.jpg?max-w=1024&q=50&auto=format,compress&usm=10&usmrad=3",
+      "https://www.google.com/url?sa=i&url=https%3A%2F%2Fguayaquil.laguarda.com.ec%2Fvintage-men-s-swiss-watch-professional-500m-diver-quartz-watch-hgp-diver-watch-U0VVTlBFQF1cFllX&psig=AOvVaw1ui_6wToLHPoDU9Fw2Q8Vy&ust=1711659060032000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCNj1loSplYUDFQAAAAAdAAAAABAE"
+    ],
+    "name": "Men's Diver's Watch",
+    "description": "Water-resistant diver's watch for men who love water sports.",
+    "price": 149.99,
+    "currency": "EUR",
+    "userId": "Nu0l9qZ2xlX47k2XHhX",
+    "category": "Watches",
+    "latitude": 55.7558,
+    "longitude": 37.6173
+  }
+]

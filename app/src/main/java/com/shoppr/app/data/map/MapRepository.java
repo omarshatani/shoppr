@@ -26,8 +26,8 @@ public class MapRepository {
         dataSource.getListings(successCallback, errorCallback);
     }
 
-    public void addListings(Object data, Callback<Void> callback) {
-        dataSource.addListings(data, result -> callback.onSuccess(null));
+    public void addListing(Object data, Callback<Void> callback) {
+        dataSource.addListing(data, result -> callback.onSuccess(null));
     }
 
 }

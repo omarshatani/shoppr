@@ -1,6 +1,7 @@
 package com.shoppr.app.data.common;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * A generic class that holds a result success w/ data or an error exception.
@@ -27,7 +28,7 @@ public abstract class Result<T> {
     public final static class Success<T> extends Result<T> {
         public T data;
 
-        public Success(T data) {
+        public Success(@Nullable T data) {
             this.data = data;
         }
 
