@@ -1,13 +1,13 @@
 package com.shoppr.app.ui.map;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +25,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterManager;
 import com.shoppr.app.MainActivityViewModel;
 import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.Listing;
+import com.shoppr.app.data.map.ClusterMarkerItem;
 import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentMapBinding;
 import com.shoppr.app.domain.utils.JsonUtils;
@@ -52,9 +54,11 @@ public class MapFragment extends Fragment {
     private LoginViewModel loginViewModel;
     private MainActivityViewModel mainActivityViewModel;
     private UserViewModel userViewModel;
+    private LocationManager locationManager;
+    private ClusterManager<ClusterMarkerItem> clusterManager;
+    private GoogleMap map;
     private FragmentMapBinding binding;
     SupportMapFragment mapFragment;
-
     ActivityResultLauncher<String[]> locationPermissionRequest =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
             });
@@ -88,17 +92,18 @@ public class MapFragment extends Fragment {
 
         final Button logoutCta = binding.logoutCta;
 
-        mapViewModel.retrieveListings();
-
         mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
             if (googleMap != null) {
+                map = googleMap;
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     locationPermissionRequest.launch(permissions);
                 } else {
                     initialiseMap();
+                    mapViewModel.retrieveListings();
                 }
             }
         });
+
         mapViewModel.getListings().observe(getViewLifecycleOwner(), listings -> {
             if (listings == null) {
                 return;
@@ -106,9 +111,7 @@ public class MapFragment extends Fragment {
             if (listings.isEmpty()) {
                 mapViewModel.addListings(this.convertJsonMockToListings());
             } else {
-                for (Listing listing : listings) {
-                    Log.d("LISTING", listing.toString());
-                }
+                populateMarkerClusters(listings);
             }
         });
 
@@ -117,7 +120,6 @@ public class MapFragment extends Fragment {
             mainActivityViewModel.setUser(null);
         });
 
-
     }
 
     @Override
@@ -125,11 +127,60 @@ public class MapFragment extends Fragment {
         super.onResume();
         if (!mapViewModel.getHasInitialised()) {
             initialiseMap();
+            mapViewModel.retrieveListings();
         }
     }
 
     private void initialiseMap() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (map == null) {
+            return;
+        }
+
+        map.setMyLocationEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);
+        map.getUiSettings().setZoomGesturesEnabled(true);
+
+        locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+        Location userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        if (userLocation != null) {
+            LatLng currentUserLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+            User currentUser = loginViewModel.getCurrentUser();
+            Map<String, Object> geoMap = new HashMap<>();
+            geoMap.put("latitude", currentUserLocation.latitude);
+            geoMap.put("longitude", currentUserLocation.longitude);
+            userViewModel.updateUser(geoMap, currentUser.getUuid());
+            setUpClusterer(currentUserLocation);
+        }
+
+        this.mapViewModel.setHasInitialised(true);
+    }
+
+    @SuppressLint("PotentialBehaviorOverride")
+    private void setUpClusterer(LatLng userLocation) {
+        // Position the map.
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 12f));
+
+        // Initialize the manager with the context and the map.
+        clusterManager = new ClusterManager<>(requireContext(), map);
+
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        map.setOnCameraIdleListener(clusterManager);
+        map.setOnMarkerClickListener(clusterManager);
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private void populateMarkerClusters(ArrayList<Listing> listings) {
+        Location userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+        if (userLocation == null) {
             return;
         }
 
@@ -139,25 +190,10 @@ public class MapFragment extends Fragment {
             return;
         }
 
-        googleMap.setMyLocationEnabled(true);
-        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
-        googleMap.getUiSettings().setZoomControlsEnabled(true);
-        googleMap.getUiSettings().setZoomGesturesEnabled(true);
-
-        LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if (location != null) {
-            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 15));
-            User currentUser = loginViewModel.getCurrentUser();
-            Map<String, Object> map = new HashMap<>();
-            map.put("latitude", userLocation.latitude);
-            map.put("longitude", userLocation.longitude);
-            userViewModel.updateUser(map, currentUser.getUuid());
+        for (Listing listing : listings) {
+            ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription());
+            clusterManager.addItem(offsetItem);
         }
-
-        this.mapViewModel.setHasInitialised(true);
     }
 
     private ArrayList<Listing> convertJsonMockToListings() {
@@ -176,6 +212,5 @@ public class MapFragment extends Fragment {
             throw new RuntimeException(e);
         }
     }
-
 
 }
