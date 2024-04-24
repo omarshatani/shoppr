@@ -33,6 +33,22 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onBackPressed() {
+//        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+//        NavDestination destination = navController.getCurrentDestination();
+//
+//        assert destination != null;
+//        assert destination.getLabel() != null;
+//
+//        if (destination.getLabel().equals("fragment_checkout")) {
+//            navigateToMapFragment();
+//        } else {
+//            super.onBackPressed();
+//        }
+
+    }
+
     private void navigateToLoginFragment() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         navController.navigate(R.id.action_main_to_login);

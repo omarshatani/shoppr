@@ -1,10 +1,13 @@
 package com.shoppr.app.ui.map;
 
+import static com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -12,6 +15,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,11 +25,15 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.maps.android.clustering.ClusterManager;
 import com.shoppr.app.MainActivityViewModel;
 import com.shoppr.app.R;
@@ -32,14 +41,15 @@ import com.shoppr.app.data.listing.model.Listing;
 import com.shoppr.app.data.map.ClusterMarkerItem;
 import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentMapBinding;
+import com.shoppr.app.domain.utils.DeviceUtils;
+import com.shoppr.app.domain.utils.ImageAdapter;
 import com.shoppr.app.domain.utils.JsonUtils;
+import com.shoppr.app.ui.carousel.ImageViewActivity;
 import com.shoppr.app.ui.login.LoginViewModel;
 import com.shoppr.app.ui.login.LoginViewModelFactory;
 import com.shoppr.app.ui.user.UserViewModel;
 import com.shoppr.app.ui.user.UserViewModelFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +69,8 @@ public class MapFragment extends Fragment {
     private GoogleMap map;
     private FragmentMapBinding binding;
     SupportMapFragment mapFragment;
+    BottomSheetBehavior<LinearLayout> dialog;
+    RecyclerView recyclerView;
     ActivityResultLauncher<String[]> locationPermissionRequest =
             registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
             });
@@ -91,10 +103,30 @@ public class MapFragment extends Fragment {
         mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
 
         final Button logoutCta = binding.logoutCta;
+        final int screenHeight = DeviceUtils.getScreenHeight(requireContext());
+
+        dialog = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet_dialog));
+        dialog.setState(STATE_HIDDEN);
+        dialog.setHideable(true);
+        dialog.setDraggable(true);
+        dialog.setMaxHeight((int) (screenHeight / 1.8));
+        dialog.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+
+            }
+        });
+
+        recyclerView = view.findViewById(R.id.recycler);
 
         mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
             if (googleMap != null) {
-                map = googleMap;
+                this.map = googleMap;
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     locationPermissionRequest.launch(permissions);
                 } else {
@@ -109,7 +141,7 @@ public class MapFragment extends Fragment {
                 return;
             }
             if (listings.isEmpty()) {
-                mapViewModel.addListings(this.convertJsonMockToListings());
+                mapViewModel.addListings(JsonUtils.convertJsonMockToListings(requireActivity()));
             } else {
                 populateMarkerClusters(listings);
             }
@@ -173,7 +205,6 @@ public class MapFragment extends Fragment {
         // manager.
         map.setOnCameraIdleListener(clusterManager);
         map.setOnMarkerClickListener(clusterManager);
-
     }
 
     @SuppressLint("MissingPermission")
@@ -193,23 +224,39 @@ public class MapFragment extends Fragment {
         for (Listing listing : listings) {
             ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription());
             clusterManager.addItem(offsetItem);
-        }
-    }
+            clusterManager.setOnClusterItemClickListener(item -> {
+                dialog.setState(BottomSheetBehavior.STATE_EXPANDED);
 
-    private ArrayList<Listing> convertJsonMockToListings() {
-        AssetManager assetManager = requireActivity().getAssets();
-        String json;
-        try {
-            InputStream inputStream = assetManager.open("LISTINGS_MOCK.json");
-            StringBuilder builder = new StringBuilder();
-            int data;
-            while ((data = inputStream.read()) != -1) {
-                builder.append((char) data);
-            }
-            json = builder.toString();
-            return JsonUtils.convertJsonToArrayList(json);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                Listing currentListing = listings.stream().filter(element -> {
+                    assert item.getTitle() != null;
+                    return item.getTitle().equals(element.getName());
+                }).findFirst().orElse(null);
+
+                assert currentListing != null;
+
+                ArrayList<String> arrayList = new ArrayList<>(currentListing.getImageUrls());
+                ImageAdapter adapter = new ImageAdapter(requireContext(), arrayList);
+                adapter.setOnItemClickListener((imageView, path) -> startActivity(new Intent(requireActivity(), ImageViewActivity.class).putExtra("image", path),
+                        ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imageView, "image").toBundle()));
+                recyclerView.setAdapter(adapter);
+
+                TextView title = binding.getRoot().findViewById(R.id.title);
+                TextView description = binding.getRoot().findViewById(R.id.description);
+                TextView price = binding.getRoot().findViewById(R.id.price);
+                Button buyNowCta = binding.getRoot().findViewById(R.id.buyNow);
+                title.setText(currentListing.getName());
+                description.setText(currentListing.getDescription());
+                String formattedPrice = String.format(getResources().getString(R.string.price_format), currentListing.getCurrency(), currentListing.getPrice());
+                price.setText(formattedPrice);
+
+                buyNowCta.setOnClickListener(v -> {
+                    dialog.setState(STATE_HIDDEN);
+                    NavController navController = Navigation.findNavController(v);
+                    navController.navigate(R.id.action_mapFragment_to_checkoutFragment);
+                });
+
+                return true;
+            });
         }
     }
 

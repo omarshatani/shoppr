@@ -19,7 +19,11 @@
         android:id="@+id/mapFragment"
         android:name="com.shoppr.app.ui.map.MapFragment"
         android:label="fragment_map"
-        tools:layout="@layout/fragment_map" />
+        tools:layout="@layout/fragment_map">
+        <action
+            android:id="@+id/action_mapFragment_to_checkoutFragment"
+            app:destination="@id/checkoutFragment" />
+    </fragment>
 
     <action
         android:id="@+id/action_main_to_login"
@@ -28,5 +32,14 @@
     <action
         android:id="@+id/action_main_to_map"
         app:destination="@id/mapFragment" />
+    <fragment
+        android:id="@+id/checkoutFragment"
+        android:name="com.shoppr.app.ui.checkout.CheckoutFragment"
+        android:label="fragment_checkout"
+        tools:layout="@layout/fragment_checkout">
+        <action
+            android:id="@+id/action_checkoutFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
+    </fragment>
 
 </navigation>

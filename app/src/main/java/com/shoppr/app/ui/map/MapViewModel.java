@@ -1,7 +1,5 @@
 package com.shoppr.app.ui.map;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -40,7 +38,6 @@ public class MapViewModel extends ViewModel {
         return listings;
     }
 
-
     public void setMap(GoogleMap googleMap) {
         map.postValue(googleMap);
     }
@@ -53,10 +50,9 @@ public class MapViewModel extends ViewModel {
         this.hasInitialised = value;
     }
 
-    public void addListings(ArrayList<Listing> listings) {
+    public void addListings(ArrayList<Listing> listingsArray) {
         GoogleMap googleMap = map.getValue();
-
-        for (Listing listing : listings) {
+        for (Listing listing : listingsArray) {
             Map<String, Object> listingsData = new HashMap<>();
             listingsData.put("name", listing.getName());
             listingsData.put("description", listing.getDescription());
@@ -71,7 +67,11 @@ public class MapViewModel extends ViewModel {
                 listingsData.put("longitude", randomCoordinate.longitude);
             }
 
-            this.addListing(listingsData, unused -> Log.d("SUCCESS", "ADD"));
+            this.addListing(listingsData, unused -> mapRepository.getListings(result -> {
+                assert result != null;
+                listings.postValue(result.getData());
+            }, error -> {
+            }));
         }
     }
 
@@ -80,11 +80,13 @@ public class MapViewModel extends ViewModel {
     }
 
     public void retrieveListings() {
-        mapRepository.getListings(result -> {
-            assert result != null;
-            listings.postValue(result.getData());
-        }, error -> {
-        });
+        if (listings.getValue() == null || listings.getValue().isEmpty()) {
+            mapRepository.getListings(result -> {
+                assert result != null;
+                listings.postValue(result.getData());
+            }, error -> {
+            });
+        }
     }
 
     public LatLng generateRandomPointNearCoordinates(LatLngBounds visibleRegion) {
