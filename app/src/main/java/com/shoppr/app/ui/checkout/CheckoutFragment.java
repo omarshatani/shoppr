@@ -29,7 +29,8 @@ public class CheckoutFragment extends Fragment {
         binding = FragmentCheckoutBinding.inflate(inflater, container, false);
 
         binding.checkoutToolbar.setNavigationIcon(R.drawable.ic_back);
-        binding.checkoutToolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_checkoutFragment_to_mapFragment));
+        binding.checkoutToolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).navigateUp());
+        binding.checkoutToolbar.setTitle("Checkout");
 
         return binding.getRoot();
     }
@@ -39,5 +40,13 @@ public class CheckoutFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(CheckoutViewModel.class);
+
+        String itemName = CheckoutFragmentArgs.fromBundle(getArguments()).getItemName();
+        String price = CheckoutFragmentArgs.fromBundle(getArguments()).getPrice();
+        String currency = CheckoutFragmentArgs.fromBundle(getArguments()).getCurrency();
+
+        binding.itemName.setText(itemName);
+        binding.itemPrice.setText(price);
+        binding.itemCurrency.setText(currency);
     }
 }

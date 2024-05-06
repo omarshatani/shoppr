@@ -68,6 +68,8 @@ public class MapFragment extends Fragment {
     private ClusterManager<ClusterMarkerItem> clusterManager;
     private GoogleMap map;
     private FragmentMapBinding binding;
+    Location userLocation;
+    private ArrayList<Listing> listings = new ArrayList<>();
     SupportMapFragment mapFragment;
     BottomSheetBehavior<LinearLayout> dialog;
     RecyclerView recyclerView;
@@ -83,12 +85,19 @@ public class MapFragment extends Fragment {
 
         assert mapFragment != null;
 
-        requireActivity().getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.map, mapFragment)
-                .commit();
+        if (!mapFragment.isAdded()) {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(R.id.map, mapFragment)
+                    .commit();
+        }
 
-        mapFragment.getMapAsync(googleMap -> mapViewModel.setMap(googleMap));
+        mapFragment.getMapAsync(googleMap -> {
+            mapViewModel.setMap(googleMap);
+            if (!this.listings.isEmpty()) {
+                googleMap.clear();
+            }
+        });
 
         return binding.getRoot();
     }
@@ -143,6 +152,7 @@ public class MapFragment extends Fragment {
             if (listings.isEmpty()) {
                 mapViewModel.addListings(JsonUtils.convertJsonMockToListings(requireActivity()));
             } else {
+                this.listings = listings;
                 populateMarkerClusters(listings);
             }
         });
@@ -159,8 +169,8 @@ public class MapFragment extends Fragment {
         super.onResume();
         if (!mapViewModel.getHasInitialised()) {
             initialiseMap();
-            mapViewModel.retrieveListings();
         }
+        mapViewModel.retrieveListings();
     }
 
     private void initialiseMap() {
@@ -178,7 +188,7 @@ public class MapFragment extends Fragment {
         map.getUiSettings().setZoomGesturesEnabled(true);
 
         locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        Location userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         if (userLocation != null) {
             LatLng currentUserLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
@@ -196,7 +206,7 @@ public class MapFragment extends Fragment {
     @SuppressLint("PotentialBehaviorOverride")
     private void setUpClusterer(LatLng userLocation) {
         // Position the map.
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 12f));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18f));
 
         // Initialize the manager with the context and the map.
         clusterManager = new ClusterManager<>(requireContext(), map);
@@ -207,24 +217,13 @@ public class MapFragment extends Fragment {
         map.setOnMarkerClickListener(clusterManager);
     }
 
-    @SuppressLint("MissingPermission")
     private void populateMarkerClusters(ArrayList<Listing> listings) {
-        Location userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if (userLocation == null) {
-            return;
-        }
-
-        GoogleMap googleMap = mapViewModel.getMap().getValue();
-
-        if (googleMap == null) {
-            return;
-        }
 
         for (Listing listing : listings) {
             ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription());
             clusterManager.addItem(offsetItem);
             clusterManager.setOnClusterItemClickListener(item -> {
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(item.getPosition(), 18f));
                 dialog.setState(BottomSheetBehavior.STATE_EXPANDED);
 
                 Listing currentListing = listings.stream().filter(element -> {
@@ -252,7 +251,13 @@ public class MapFragment extends Fragment {
                 buyNowCta.setOnClickListener(v -> {
                     dialog.setState(STATE_HIDDEN);
                     NavController navController = Navigation.findNavController(v);
-                    navController.navigate(R.id.action_mapFragment_to_checkoutFragment);
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString("itemName", currentListing.getName());
+                    bundle.putString("price", String.valueOf(currentListing.getPrice()));
+                    bundle.putString("currency", currentListing.getCurrency());
+
+                    navController.navigate(R.id.action_mapFragment_to_checkoutFragment, bundle);
                 });
 
                 return true;

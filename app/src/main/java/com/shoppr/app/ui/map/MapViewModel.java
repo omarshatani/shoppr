@@ -39,7 +39,9 @@ public class MapViewModel extends ViewModel {
     }
 
     public void setMap(GoogleMap googleMap) {
-        map.postValue(googleMap);
+        if (map.getValue() == null) {
+            map.setValue(googleMap);
+        }
     }
 
     public boolean getHasInitialised() {
