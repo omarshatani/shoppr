@@ -56,4 +56,18 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="price_format">%s %.2f</string>
+    <string name="please_select_a_payment_method">Please select a payment method</string>
+    <string name="complete_you_order">Complete you order</string>
+    <string name="select_payment_method">Select payment method</string>
+    <string name="credit_card">Credit card</string>
+    <string name="credit_card_number">Credit card number</string>
+    <string name="name_and_surname">Name and surname</string>
+    <string name="exp">Exp</string>
+    <string name="cvv">CVV</string>
+    <string name="billing_zip">Billing ZIP</string>
+    <string name="billing_address">Billing address</string>
+    <string name="cash">Cash</string>
+    <string name="summary">Summary</string>
+    <string name="total">Total</string>
+    <string name="field_required">This field is required</string>
 </resources>

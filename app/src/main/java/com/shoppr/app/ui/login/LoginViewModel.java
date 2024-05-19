@@ -1,6 +1,8 @@
 package com.shoppr.app.ui.login;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Patterns;
 
@@ -61,8 +63,8 @@ public class LoginViewModel extends ViewModel {
         });
     }
 
-    public void loginWithGoogle(Intent data) {
-        loginRepository.loginWithGoogle(data, new Callback<User>() {
+    public void loginWithGoogle(Intent data, SharedPreferences preferences) {
+        loginRepository.loginWithGoogle(data, preferences, new Callback<User>() {
             @Override
             public void onSuccess(Result.Success<User> result) {
                 User loggedInUser = result.getData();
@@ -90,8 +92,9 @@ public class LoginViewModel extends ViewModel {
         }
     }
 
-    public User getCurrentUser() {
-        return loginRepository.getCurrentUser();
+    public User getCurrentUser(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("credentials", Context.MODE_PRIVATE);
+        return loginRepository.getCurrentUser(preferences);
     }
 
     // A placeholder username validation check

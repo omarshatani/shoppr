@@ -153,7 +153,9 @@ public class MapFragment extends Fragment {
                 mapViewModel.addListings(JsonUtils.convertJsonMockToListings(requireActivity()));
             } else {
                 this.listings = listings;
-                populateMarkerClusters(listings);
+							if (this.map != null) {
+								populateMarkerClusters(listings);
+							}
             }
         });
 
@@ -192,25 +194,21 @@ public class MapFragment extends Fragment {
 
         if (userLocation != null) {
             LatLng currentUserLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-            User currentUser = loginViewModel.getCurrentUser();
+					User currentUser = loginViewModel.getCurrentUser(requireActivity());
             Map<String, Object> geoMap = new HashMap<>();
             geoMap.put("latitude", currentUserLocation.latitude);
             geoMap.put("longitude", currentUserLocation.longitude);
             userViewModel.updateUser(geoMap, currentUser.getUuid());
-            setUpClusterer(currentUserLocation);
+					map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserLocation, 18f));
         }
 
         this.mapViewModel.setHasInitialised(true);
     }
 
     @SuppressLint("PotentialBehaviorOverride")
-    private void setUpClusterer(LatLng userLocation) {
-        // Position the map.
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18f));
-
+		private void setUpClusterer() {
         // Initialize the manager with the context and the map.
         clusterManager = new ClusterManager<>(requireContext(), map);
-
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
         map.setOnCameraIdleListener(clusterManager);
@@ -219,8 +217,17 @@ public class MapFragment extends Fragment {
 
     private void populateMarkerClusters(ArrayList<Listing> listings) {
 
+			if (clusterManager == null) {
+				setUpClusterer();
+			}
+
+			if (listings.isEmpty()) {
+				return;
+			}
+
         for (Listing listing : listings) {
             ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription());
+
             clusterManager.addItem(offsetItem);
             clusterManager.setOnClusterItemClickListener(item -> {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(item.getPosition(), 18f));
@@ -256,6 +263,8 @@ public class MapFragment extends Fragment {
                     bundle.putString("itemName", currentListing.getName());
                     bundle.putString("price", String.valueOf(currentListing.getPrice()));
                     bundle.putString("currency", currentListing.getCurrency());
+									bundle.putString("sellerId", currentListing.getUserId());
+									bundle.putString("listingId", currentListing.getId());
 
                     navController.navigate(R.id.action_mapFragment_to_checkoutFragment, bundle);
                 });

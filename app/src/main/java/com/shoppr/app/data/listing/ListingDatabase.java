@@ -22,7 +22,9 @@ public class ListingDatabase extends Database<Listing> {
 
     public static ListingDatabase getInstance() {
         if (instance == null) {
-            instance = new ListingDatabase(new FirestoreDatasource(DOCUMENT));
+					synchronized (ListingDatabase.class) {
+						instance = new ListingDatabase(new FirestoreDatasource(DOCUMENT));
+					}
         }
         return instance;
     }
@@ -44,8 +46,9 @@ public class ListingDatabase extends Database<Listing> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     if (document.exists()) {
-                        Listing element = document.toObject(Listing.class);
-                        elements.add(element);
+											Listing listing = document.toObject(Listing.class);
+											listing.setId(document.getId());
+											elements.add(listing);
                     }
                 }
                 callback.onSuccess(new Result.Success<>(elements));

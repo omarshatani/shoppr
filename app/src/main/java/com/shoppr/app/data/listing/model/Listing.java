@@ -3,6 +3,7 @@ package com.shoppr.app.data.listing.model;
 import java.util.ArrayList;
 
 public class Listing {
+	private String id;
     private String name;
     private String description;
     private String category;
@@ -13,8 +14,8 @@ public class Listing {
     private double latitude;
     private double longitude;
 
-    public Listing() {
-    }
+	public Listing() {
+	}
 
     public Listing(String name, String description, String category, String userId, ArrayList<String> imageUrls, double price, String currency, double latitude, double longitude) {
         this.name = name;
@@ -27,6 +28,27 @@ public class Listing {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
+	public Listing(String id, String name, String description, String category, String userId, ArrayList<String> imageUrls, double price, String currency, double latitude, double longitude) {
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.category = category;
+		this.userId = userId;
+		this.imageUrls = imageUrls;
+		this.price = price;
+		this.currency = currency;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
     public String getName() {
         return name;

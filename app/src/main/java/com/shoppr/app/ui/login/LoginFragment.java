@@ -1,5 +1,6 @@
 package com.shoppr.app.ui.login;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -37,7 +38,7 @@ public class LoginFragment extends Fragment {
     private FragmentLoginBinding binding;
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-            result -> loginViewModel.loginWithGoogle(result.getData())
+				result -> loginViewModel.loginWithGoogle(result.getData(), requireActivity().getSharedPreferences("credentials", Context.MODE_PRIVATE))
     );
     private GoogleSignInClient signInClient;
 
@@ -49,7 +50,6 @@ public class LoginFragment extends Fragment {
 
         binding = FragmentLoginBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
     @Override
@@ -65,7 +65,6 @@ public class LoginFragment extends Fragment {
                 .requestProfile()
                 .build();
         signInClient = GoogleSignIn.getClient(requireActivity(), signInOptions);
-
 
         final EditText usernameEditText = binding.username;
         final EditText passwordEditText = binding.password;

@@ -1,15 +1,20 @@
 package com.shoppr.app.data.login;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
+import com.shoppr.app.data.firebase.AuthCredentialDeserializer;
 import com.shoppr.app.data.login.adapter.UserAdapter;
 import com.shoppr.app.data.user.UserDatabase;
 import com.shoppr.app.data.user.model.User;
@@ -68,15 +73,15 @@ public class LoginRepository {
                             this.signup(username, password, signupCallback);
                         }
 
-                        this.handleAuthhenticationException(errorCode, signInCallback);
+											this.handleAuthenticationException(errorCode, signInCallback);
                     }
                 });
 
     }
 
-    public void loginWithGoogle(Intent data, Callback<User> callback) {
+	public void loginWithGoogle(Intent data, SharedPreferences preferences, Callback<User> callback) {
         try {
-            Task<AuthResult> loginTask = dataSource.loginWithGoogle(data);
+					Task<AuthResult> loginTask = dataSource.loginWithGoogle(data, preferences);
             loginTask.addOnCompleteListener(result -> {
                 if (result.isSuccessful()) {
                     FirebaseUser firebaseUser = result.getResult().getUser();
@@ -93,8 +98,19 @@ public class LoginRepository {
         }
     }
 
-    public User getCurrentUser() {
+	public User getCurrentUser(SharedPreferences preferences) {
         FirebaseUser firebaseUser = dataSource.getUser();
+		Gson gson = new GsonBuilder().registerTypeAdapter(AuthCredential.class, new AuthCredentialDeserializer()).create();
+
+		if (firebaseUser == null) {
+			return null;
+		}
+
+		AuthCredential credentials = gson.fromJson(preferences.getString("credentials", null), AuthCredential.class);
+		if (credentials != null) {
+			firebaseUser.reauthenticate(credentials);
+		}
+
         return userAdapter.adaptUserFromFirebaseUser(firebaseUser);
     }
 
@@ -115,7 +131,7 @@ public class LoginRepository {
         });
     }
 
-    private void handleAuthhenticationException(String errorCode, Callback<User> callback) {
+	private void handleAuthenticationException(String errorCode, Callback<User> callback) {
         switch (errorCode) {
             case "ERROR_INVALID_CREDENTIAL":
                 // Invalid password

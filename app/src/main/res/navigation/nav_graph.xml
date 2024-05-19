@@ -49,6 +49,12 @@
         <argument
             android:name="currency"
             app:argType="string" />
+        <argument
+            android:name="listingId"
+            app:argType="string" />
+        <argument
+            android:name="sellerId"
+            app:argType="string" />
     </fragment>
 
 </navigation>

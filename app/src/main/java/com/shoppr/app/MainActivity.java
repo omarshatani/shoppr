@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         MainActivityViewModel viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         LoginViewModel loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory()).get(LoginViewModel.class);
 
-        User currentUser = loginViewModel.getCurrentUser();
+			User currentUser = loginViewModel.getCurrentUser(this);
         viewModel.setUser(currentUser);
 
         viewModel.user().observe(this, user -> {
@@ -31,22 +31,6 @@ public class MainActivity extends AppCompatActivity {
                 navigateToMapFragment();
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-//        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        NavDestination destination = navController.getCurrentDestination();
-//
-//        assert destination != null;
-//        assert destination.getLabel() != null;
-//
-//        if (destination.getLabel().equals("fragment_checkout")) {
-//            navigateToMapFragment();
-//        } else {
-//            super.onBackPressed();
-//        }
-
     }
 
     private void navigateToLoginFragment() {
