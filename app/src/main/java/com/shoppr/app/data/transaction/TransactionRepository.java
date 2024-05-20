@@ -1,5 +1,9 @@
 package com.shoppr.app.data.transaction;
 
+import android.os.Handler;
+
+import com.shoppr.app.data.common.Callback;
+import com.shoppr.app.data.common.Result;
 import com.shoppr.app.data.transaction.model.Transaction;
 
 public class TransactionRepository {
@@ -19,7 +23,14 @@ public class TransactionRepository {
 		return instance;
 	}
 
-	public void saveTransaction(Transaction transaction) {
-		database.add(transaction);
+	public void saveTransaction(Transaction transaction, Callback<Boolean> callback) {
+		database.add(transaction).addOnCompleteListener(task -> {
+			if (task.isSuccessful()) {
+				Handler handler = new Handler();
+				handler.postDelayed(() -> callback.onSuccess(new Result.Success<>(true)), 3000);
+			} else {
+				callback.onError(task.getException());
+			}
+		});
 	}
 }

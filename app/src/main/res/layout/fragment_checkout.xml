@@ -240,17 +240,41 @@
                     </com.google.android.flexbox.FlexboxLayout>
                 </com.google.android.flexbox.FlexboxLayout>
             </LinearLayout>
+
         </RelativeLayout>
 
-        <Button
-            android:id="@+id/buy_cta"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/main_container"
-            android:layout_centerHorizontal="true"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="16dp"
-            android:text="Buy" />
+            android:layout_below="@+id/main_container">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buy_cta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="16dp"
+                android:padding="16dp"
+                android:paddingVertical="8dp"
+                android:text="@string/buy"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="8dp"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/buy_cta"
+                app:layout_constraintEnd_toEndOf="@+id/buy_cta"
+                app:layout_constraintStart_toStartOf="@+id/buy_cta"
+                app:layout_constraintTop_toTopOf="@+id/buy_cta" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </RelativeLayout>
 

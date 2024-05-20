@@ -70,4 +70,10 @@
     <string name="summary">Summary</string>
     <string name="total">Total</string>
     <string name="field_required">This field is required</string>
+    <string name="buy">Buy</string>
+    <string name="logout">Logout</string>
+    <string name="profile">Profile</string>
+    <string name="sell">Sell</string>
+    <string name="your_orders">Your orders</string>
+    <string name="sold_items_list">Sold items list</string>
 </resources>

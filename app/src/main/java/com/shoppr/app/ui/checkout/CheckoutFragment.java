@@ -6,6 +6,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -89,12 +90,20 @@ public class CheckoutFragment extends Fragment {
         });
 
         binding.buyCta.setOnClickListener(v -> {
+
+            binding.buyCta.setText(null);
+            binding.buyCta.setEnabled(false);
+            binding.progressBar.setVisibility(View.VISIBLE);
+
             PaymentMethod paymentMethod;
 
             if (!binding.creditCard.isChecked() && !binding.cash.isChecked()) {
                 binding.creditCard.setError(getString(R.string.field_required));
                 binding.cash.setError(getString(R.string.field_required));
                 binding.errorTextView.setVisibility(View.VISIBLE);
+                binding.buyCta.setText(R.string.buy);
+                binding.buyCta.setEnabled(true);
+                binding.progressBar.setVisibility(View.GONE);
                 return;
             }
 
@@ -107,7 +116,11 @@ public class CheckoutFragment extends Fragment {
                     binding.creditCardZip.getText().toString(),
                     binding.creditCardAddress.getText().toString()
                 );
+
                 if (!isFormValid) {
+                    binding.buyCta.setText(R.string.buy);
+                    binding.buyCta.setEnabled(true);
+                    binding.progressBar.setVisibility(View.GONE);
                     return;
                 }
 
@@ -118,7 +131,14 @@ public class CheckoutFragment extends Fragment {
                 paymentMethod = new Cash();
             }
 
-            viewModel.buy(listingId, sellerId, loginViewModel.getCurrentUser(requireActivity()).getUuid(), price, currency, paymentMethod);
+            viewModel.buy(listingId, sellerId, loginViewModel.getCurrentUser(requireActivity()).getUuid(), price, currency, paymentMethod, result -> {
+                binding.progressBar.setVisibility(View.GONE);
+                Toast toast = new Toast(requireContext());
+                toast.setText("Your order has been placed successfully");
+                toast.setDuration(Toast.LENGTH_LONG);
+                toast.show();
+                Navigation.findNavController(requireView()).navigate(R.id.action_checkoutFragment_to_mapFragment);
+            });
         });
 
         viewModel.getCheckoutFormState().observe(getViewLifecycleOwner(), checkoutFormState -> {

@@ -56,222 +56,226 @@ import java.util.Map;
 
 public class MapFragment extends Fragment {
 
-    private final String[] permissions = new String[]{
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-    };
-    private MapViewModel mapViewModel;
-    private LoginViewModel loginViewModel;
-    private MainActivityViewModel mainActivityViewModel;
-    private UserViewModel userViewModel;
-    private LocationManager locationManager;
-    private ClusterManager<ClusterMarkerItem> clusterManager;
-    private GoogleMap map;
-    private FragmentMapBinding binding;
-    Location userLocation;
-    private ArrayList<Listing> listings = new ArrayList<>();
-    SupportMapFragment mapFragment;
-    BottomSheetBehavior<LinearLayout> dialog;
-    RecyclerView recyclerView;
-    ActivityResultLauncher<String[]> locationPermissionRequest =
-            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
-            });
+	private final String[] permissions = new String[]{
+			Manifest.permission.ACCESS_FINE_LOCATION,
+			Manifest.permission.ACCESS_COARSE_LOCATION
+	};
+	Location userLocation;
+	SupportMapFragment mapFragment;
+	BottomSheetBehavior<LinearLayout> dialog;
+	RecyclerView recyclerView;
+	ActivityResultLauncher<String[]> locationPermissionRequest =
+			registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+			});
+	private MapViewModel mapViewModel;
+	private LoginViewModel loginViewModel;
+	private MainActivityViewModel mainActivityViewModel;
+	private UserViewModel userViewModel;
+	private ClusterManager<ClusterMarkerItem> clusterManager;
+	private GoogleMap map;
+	private FragmentMapBinding binding;
+	private ArrayList<Listing> listings = new ArrayList<>();
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        binding = FragmentMapBinding.inflate(inflater, container, false);
-        mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+	@Override
+	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+													 @Nullable Bundle savedInstanceState) {
+		binding = FragmentMapBinding.inflate(inflater, container, false);
+		mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
-        assert mapFragment != null;
+		assert mapFragment != null;
 
-        if (!mapFragment.isAdded()) {
-            requireActivity().getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.map, mapFragment)
-                    .commit();
-        }
+		if (!mapFragment.isAdded()) {
+			requireActivity().getSupportFragmentManager()
+					.beginTransaction()
+					.add(R.id.map, mapFragment)
+					.commit();
+		}
 
-        mapFragment.getMapAsync(googleMap -> {
-            mapViewModel.setMap(googleMap);
-            if (!this.listings.isEmpty()) {
-                googleMap.clear();
-            }
-        });
+		mapFragment.getMapAsync(googleMap -> {
+			mapViewModel.setMap(googleMap);
+			if (!this.listings.isEmpty()) {
+				googleMap.clear();
+			}
+		});
 
-        return binding.getRoot();
-    }
+		return binding.getRoot();
+	}
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mapViewModel = new ViewModelProvider(this, new MapViewModelFactory())
-                .get(MapViewModel.class);
-        loginViewModel = new ViewModelProvider(requireActivity(), new LoginViewModelFactory()).get(LoginViewModel.class);
-        userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory()).get(UserViewModel.class);
-        mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
+	@Override
+	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		mapViewModel = new ViewModelProvider(this, new MapViewModelFactory())
+				.get(MapViewModel.class);
+		loginViewModel = new ViewModelProvider(requireActivity(), new LoginViewModelFactory()).get(LoginViewModel.class);
+		userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory()).get(UserViewModel.class);
+		mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
 
-        final Button logoutCta = binding.logoutCta;
-        final int screenHeight = DeviceUtils.getScreenHeight(requireContext());
+		final Button logoutCta = binding.logoutCta;
+		final int screenHeight = DeviceUtils.getScreenHeight(requireContext());
 
-        dialog = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet_dialog));
-        dialog.setState(STATE_HIDDEN);
-        dialog.setHideable(true);
-        dialog.setDraggable(true);
-        dialog.setMaxHeight((int) (screenHeight / 1.8));
-        dialog.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View view, int i) {
-
-            }
-
-            @Override
-            public void onSlide(@NonNull View view, float v) {
-
-            }
-        });
-
-        recyclerView = view.findViewById(R.id.recycler);
-
-        mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
-            if (googleMap != null) {
-                this.map = googleMap;
-                if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    locationPermissionRequest.launch(permissions);
-                } else {
-                    initialiseMap();
-                    mapViewModel.retrieveListings();
-                }
-            }
-        });
-
-        mapViewModel.getListings().observe(getViewLifecycleOwner(), listings -> {
-            if (listings == null) {
-                return;
-            }
-            if (listings.isEmpty()) {
-                mapViewModel.addListings(JsonUtils.convertJsonMockToListings(requireActivity()));
-            } else {
-                this.listings = listings;
-							if (this.map != null) {
-								populateMarkerClusters(listings);
-							}
-            }
-        });
-
-        logoutCta.setOnClickListener(v -> {
-            loginViewModel.logout();
-            mainActivityViewModel.setUser(null);
-        });
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!mapViewModel.getHasInitialised()) {
-            initialiseMap();
-        }
-        mapViewModel.retrieveListings();
-    }
-
-    private void initialiseMap() {
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        if (map == null) {
-            return;
-        }
-
-        map.setMyLocationEnabled(true);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.getUiSettings().setZoomControlsEnabled(true);
-        map.getUiSettings().setZoomGesturesEnabled(true);
-
-        locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
-        userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if (userLocation != null) {
-            LatLng currentUserLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-					User currentUser = loginViewModel.getCurrentUser(requireActivity());
-            Map<String, Object> geoMap = new HashMap<>();
-            geoMap.put("latitude", currentUserLocation.latitude);
-            geoMap.put("longitude", currentUserLocation.longitude);
-            userViewModel.updateUser(geoMap, currentUser.getUuid());
-					map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserLocation, 18f));
-        }
-
-        this.mapViewModel.setHasInitialised(true);
-    }
-
-    @SuppressLint("PotentialBehaviorOverride")
-		private void setUpClusterer() {
-        // Initialize the manager with the context and the map.
-        clusterManager = new ClusterManager<>(requireContext(), map);
-        // Point the map's listeners at the listeners implemented by the cluster
-        // manager.
-        map.setOnCameraIdleListener(clusterManager);
-        map.setOnMarkerClickListener(clusterManager);
-    }
-
-    private void populateMarkerClusters(ArrayList<Listing> listings) {
-
-			if (clusterManager == null) {
-				setUpClusterer();
+		dialog = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet_dialog));
+		dialog.setState(STATE_HIDDEN);
+		dialog.setHideable(true);
+		dialog.setDraggable(true);
+		dialog.setMaxHeight((int) (screenHeight / 1.8));
+		dialog.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+			@Override
+			public void onStateChanged(@NonNull View view, int i) {
+				if (i == BottomSheetBehavior.STATE_COLLAPSED || i == BottomSheetBehavior.STATE_HIDDEN) {
+					binding.logoutCta.setVisibility(View.VISIBLE);
+					binding.actionsCtaContainer.setVisibility(View.VISIBLE);
+				}
 			}
 
-			if (listings.isEmpty()) {
+			@Override
+			public void onSlide(@NonNull View view, float v) {
+
+			}
+		});
+
+		recyclerView = view.findViewById(R.id.recycler);
+
+		mapViewModel.getMap().observe(getViewLifecycleOwner(), googleMap -> {
+			if (googleMap != null) {
+				this.map = googleMap;
+				if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+					locationPermissionRequest.launch(permissions);
+				} else {
+					initialiseMap();
+					mapViewModel.retrieveListings();
+				}
+			}
+		});
+
+		mapViewModel.getListings().observe(getViewLifecycleOwner(), listings -> {
+			if (listings == null) {
 				return;
 			}
+			if (listings.isEmpty()) {
+				mapViewModel.addListings(JsonUtils.convertJsonMockToListings(requireActivity()));
+			} else {
+				this.listings = listings;
+				if (this.map != null) {
+					populateMarkerClusters(listings);
+				}
+			}
+		});
 
-        for (Listing listing : listings) {
-            ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription());
+		logoutCta.setOnClickListener(v -> {
+			loginViewModel.logout();
+			mainActivityViewModel.setUser(null);
+		});
 
-            clusterManager.addItem(offsetItem);
-            clusterManager.setOnClusterItemClickListener(item -> {
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(item.getPosition(), 18f));
-                dialog.setState(BottomSheetBehavior.STATE_EXPANDED);
+	}
 
-                Listing currentListing = listings.stream().filter(element -> {
-                    assert item.getTitle() != null;
-                    return item.getTitle().equals(element.getName());
-                }).findFirst().orElse(null);
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (!mapViewModel.getHasInitialised()) {
+			initialiseMap();
+		}
+		mapViewModel.retrieveListings();
+	}
 
-                assert currentListing != null;
+	private void initialiseMap() {
+		if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			return;
+		}
 
-                ArrayList<String> arrayList = new ArrayList<>(currentListing.getImageUrls());
-                ImageAdapter adapter = new ImageAdapter(requireContext(), arrayList);
-                adapter.setOnItemClickListener((imageView, path) -> startActivity(new Intent(requireActivity(), ImageViewActivity.class).putExtra("image", path),
-                        ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imageView, "image").toBundle()));
-                recyclerView.setAdapter(adapter);
+		if (map == null) {
+			return;
+		}
 
-                TextView title = binding.getRoot().findViewById(R.id.title);
-                TextView description = binding.getRoot().findViewById(R.id.description);
-                TextView price = binding.getRoot().findViewById(R.id.price);
-                Button buyNowCta = binding.getRoot().findViewById(R.id.buyNow);
-                title.setText(currentListing.getName());
-                description.setText(currentListing.getDescription());
-                String formattedPrice = String.format(getResources().getString(R.string.price_format), currentListing.getCurrency(), currentListing.getPrice());
-                price.setText(formattedPrice);
+		map.setMyLocationEnabled(true);
+		map.getUiSettings().setMyLocationButtonEnabled(true);
+		map.getUiSettings().setZoomControlsEnabled(true);
+		map.getUiSettings().setZoomGesturesEnabled(true);
 
-                buyNowCta.setOnClickListener(v -> {
-                    dialog.setState(STATE_HIDDEN);
-                    NavController navController = Navigation.findNavController(v);
+		LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
+		userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-                    Bundle bundle = new Bundle();
-                    bundle.putString("itemName", currentListing.getName());
-                    bundle.putString("price", String.valueOf(currentListing.getPrice()));
-                    bundle.putString("currency", currentListing.getCurrency());
-									bundle.putString("sellerId", currentListing.getUserId());
-									bundle.putString("listingId", currentListing.getId());
+		if (userLocation != null) {
+			LatLng currentUserLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+			User currentUser = loginViewModel.getCurrentUser(requireActivity());
+			Map<String, Object> geoMap = new HashMap<>();
+			geoMap.put("latitude", currentUserLocation.latitude);
+			geoMap.put("longitude", currentUserLocation.longitude);
+			userViewModel.updateUser(geoMap, currentUser.getUuid());
+			map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserLocation, 18f));
+		}
 
-                    navController.navigate(R.id.action_mapFragment_to_checkoutFragment, bundle);
-                });
+		this.mapViewModel.setHasInitialised(true);
+	}
 
-                return true;
-            });
-        }
-    }
+	@SuppressLint("PotentialBehaviorOverride")
+	private void setUpClusterer() {
+		// Initialize the manager with the context and the map.
+		clusterManager = new ClusterManager<>(requireContext(), map);
+		// Point the map's listeners at the listeners implemented by the cluster
+		// manager.
+		map.setOnCameraIdleListener(clusterManager);
+		map.setOnMarkerClickListener(clusterManager);
+	}
+
+	private void populateMarkerClusters(ArrayList<Listing> listings) {
+
+		if (clusterManager == null) {
+			setUpClusterer();
+		}
+
+		if (listings.isEmpty()) {
+			return;
+		}
+
+		for (Listing listing : listings) {
+			ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription());
+
+			clusterManager.addItem(offsetItem);
+			clusterManager.setOnClusterItemClickListener(item -> {
+				map.animateCamera(CameraUpdateFactory.newLatLngZoom(item.getPosition(), 18f));
+				dialog.setState(BottomSheetBehavior.STATE_EXPANDED);
+				binding.logoutCta.setVisibility(View.INVISIBLE);
+				binding.actionsCtaContainer.setVisibility(View.INVISIBLE);
+
+				Listing currentListing = listings.stream().filter(element -> {
+					assert item.getTitle() != null;
+					return item.getTitle().equals(element.getName());
+				}).findFirst().orElse(null);
+
+				assert currentListing != null;
+
+				ArrayList<String> arrayList = new ArrayList<>(currentListing.getImageUrls());
+				ImageAdapter adapter = new ImageAdapter(requireContext(), arrayList);
+				adapter.setOnItemClickListener((imageView, path) -> startActivity(new Intent(requireActivity(), ImageViewActivity.class).putExtra("image", path),
+						ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imageView, "image").toBundle()));
+				recyclerView.setAdapter(adapter);
+
+				TextView title = binding.getRoot().findViewById(R.id.title);
+				TextView description = binding.getRoot().findViewById(R.id.description);
+				TextView price = binding.getRoot().findViewById(R.id.price);
+				Button buyNowCta = binding.getRoot().findViewById(R.id.buyNow);
+				title.setText(currentListing.getName());
+				description.setText(currentListing.getDescription());
+				String formattedPrice = String.format(getResources().getString(R.string.price_format), currentListing.getCurrency(), currentListing.getPrice());
+				price.setText(formattedPrice);
+
+				buyNowCta.setOnClickListener(v -> {
+					dialog.setState(STATE_HIDDEN);
+					NavController navController = Navigation.findNavController(v);
+
+					Bundle bundle = new Bundle();
+					bundle.putString("itemName", currentListing.getName());
+					bundle.putString("price", String.valueOf(currentListing.getPrice()));
+					bundle.putString("currency", currentListing.getCurrency());
+					bundle.putString("sellerId", currentListing.getUserId());
+					bundle.putString("listingId", currentListing.getId());
+
+					navController.navigate(R.id.action_mapFragment_to_checkoutFragment, bundle);
+				});
+
+				return true;
+			});
+		}
+	}
 
 }

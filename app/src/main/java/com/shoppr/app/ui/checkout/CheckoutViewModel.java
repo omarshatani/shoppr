@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.transaction.TransactionRepository;
 import com.shoppr.app.data.transaction.model.PaymentMethod;
 import com.shoppr.app.data.transaction.model.Transaction;
@@ -33,10 +34,10 @@ public class CheckoutViewModel extends ViewModel {
 		checkoutFormState.setValue(newState);
 	}
 
-	public void buy(String listingId, String sellerId, String userId, String price, String currency, PaymentMethod paymentMethod) {
+	public void buy(String listingId, String sellerId, String userId, String price, String currency, PaymentMethod paymentMethod, Callback<Boolean> callback) {
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
 			Transaction transaction = new Transaction("1", sellerId, userId, LocalDateTime.now(), Double.parseDouble(price), currency, paymentMethod, listingId);
-			repository.saveTransaction(transaction);
+			repository.saveTransaction(transaction, callback);
 		}
 	}
 }

@@ -35,6 +35,7 @@ public class TransactionDatabase extends Database<Transaction> {
 		return dataSource.add(data);
 	}
 
+
 	@Override
 	public void add(String id, Object data) {
 		dataSource.add(data, id);
