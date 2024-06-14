@@ -5,19 +5,21 @@ import android.content.res.AssetManager;
 
 import com.google.gson.Gson;
 import com.shoppr.app.data.listing.model.Listing;
+import com.shoppr.app.data.listing.model.ListingItem;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class JsonUtils {
-    public static ArrayList<Listing> convertJsonToArrayList(String json) {
+	public static List<Listing> convertJsonToArrayList(String json) {
         Gson gson = new Gson();
-        Listing[] articles = gson.fromJson(json, Listing[].class);
+		ListingItem[] articles = gson.fromJson(json, ListingItem[].class);
         return new ArrayList<>(java.util.Arrays.asList(articles));
     }
 
-    public static ArrayList<Listing> convertJsonMockToListings(Activity activity) {
+	public static List<Listing> convertJsonMockToListings(Activity activity) {
         AssetManager assetManager = activity.getAssets();
         String json;
         try {

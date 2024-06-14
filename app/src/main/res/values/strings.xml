@@ -76,4 +76,8 @@
     <string name="sell">Sell</string>
     <string name="your_orders">Your orders</string>
     <string name="sold_items_list">Sold items list</string>
+    <string name="default_avatar">Default avatar</string>
+    <string name="username">Username</string>
+    <string name="wants_to_buy">Wants to buy</string>
+    <string name="wants_to_sell">Wants to sell</string>
 </resources>

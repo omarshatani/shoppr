@@ -1,17 +1,18 @@
 package com.shoppr.app.data.user.model;
 
-import android.location.Address;
-
 import androidx.annotation.Nullable;
 
 public class User {
-    private final String uuid;
+	private String uuid;
     private String name;
     private String email;
     private String phoneNumber;
-    private Address address;
+	private String address;
     private long latitude;
     private long longitude;
+
+	public User() {
+	}
 
     public User(String uuid) {
         this.uuid = uuid;
@@ -33,7 +34,7 @@ public class User {
         this.longitude = longitude;
     }
 
-    public User(String uuid, String name, String email, String phoneNumber, @Nullable Address address) {
+	public User(String uuid, String name, String email, String phoneNumber, @Nullable String address) {
         this.uuid = uuid;
         this.name = name;
         this.email = email;
@@ -44,6 +45,10 @@ public class User {
     public String getUuid() {
         return uuid;
     }
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
     public String getName() {
         return name;
@@ -69,11 +74,11 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-    public Address getAddress() {
+	public String getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+	public void setAddress(String address) {
         this.address = address;
     }
 

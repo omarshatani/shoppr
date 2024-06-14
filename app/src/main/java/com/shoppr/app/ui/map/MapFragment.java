@@ -17,16 +17,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,10 +37,14 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.maps.android.clustering.ClusterManager;
 import com.shoppr.app.MainActivityViewModel;
 import com.shoppr.app.R;
-import com.shoppr.app.data.listing.model.Listing;
-import com.shoppr.app.data.map.ClusterMarkerItem;
+import com.shoppr.app.data.listing.model.ListingItem;
+import com.shoppr.app.data.listing.model.ListingType;
+import com.shoppr.app.data.request.model.Request;
+import com.shoppr.app.data.request.model.RequestState;
 import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentMapBinding;
+import com.shoppr.app.domain.map.ClusterMarkerItem;
+import com.shoppr.app.domain.map.CustomClusterRenderer;
 import com.shoppr.app.domain.utils.DeviceUtils;
 import com.shoppr.app.domain.utils.ImageAdapter;
 import com.shoppr.app.domain.utils.JsonUtils;
@@ -51,7 +55,9 @@ import com.shoppr.app.ui.user.UserViewModel;
 import com.shoppr.app.ui.user.UserViewModelFactory;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapFragment extends Fragment {
@@ -74,7 +80,7 @@ public class MapFragment extends Fragment {
 	private ClusterManager<ClusterMarkerItem> clusterManager;
 	private GoogleMap map;
 	private FragmentMapBinding binding;
-	private ArrayList<Listing> listings = new ArrayList<>();
+//	private ArrayList<Listing> listings = new ArrayList<>();
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -93,9 +99,9 @@ public class MapFragment extends Fragment {
 
 		mapFragment.getMapAsync(googleMap -> {
 			mapViewModel.setMap(googleMap);
-			if (!this.listings.isEmpty()) {
-				googleMap.clear();
-			}
+//			if (!this.listings.isEmpty()) {
+//				googleMap.clear();
+//			}
 		});
 
 		return binding.getRoot();
@@ -111,13 +117,14 @@ public class MapFragment extends Fragment {
 		mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
 
 		final Button logoutCta = binding.logoutCta;
+
 		final int screenHeight = DeviceUtils.getScreenHeight(requireContext());
 
 		dialog = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet_dialog));
 		dialog.setState(STATE_HIDDEN);
 		dialog.setHideable(true);
 		dialog.setDraggable(true);
-		dialog.setMaxHeight((int) (screenHeight / 1.8));
+		dialog.setMaxHeight((int) (screenHeight / 1.5));
 		dialog.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
 			@Override
 			public void onStateChanged(@NonNull View view, int i) {
@@ -154,7 +161,7 @@ public class MapFragment extends Fragment {
 			if (listings.isEmpty()) {
 				mapViewModel.addListings(JsonUtils.convertJsonMockToListings(requireActivity()));
 			} else {
-				this.listings = listings;
+//				this.listings = listings;
 				if (this.map != null) {
 					populateMarkerClusters(listings);
 				}
@@ -207,75 +214,126 @@ public class MapFragment extends Fragment {
 		this.mapViewModel.setHasInitialised(true);
 	}
 
-	@SuppressLint("PotentialBehaviorOverride")
-	private void setUpClusterer() {
-		// Initialize the manager with the context and the map.
-		clusterManager = new ClusterManager<>(requireContext(), map);
-		// Point the map's listeners at the listeners implemented by the cluster
-		// manager.
-		map.setOnCameraIdleListener(clusterManager);
-		map.setOnMarkerClickListener(clusterManager);
-	}
+	private void populateMarkerClusters(List<ListingItem> items) {
+		Map<String, ListingItem> listingsMap = new HashMap<>();
 
-	private void populateMarkerClusters(ArrayList<Listing> listings) {
+		for (ListingItem listingItem : items) {
+			listingsMap.put(listingItem.getId(), listingItem);
+		}
 
 		if (clusterManager == null) {
 			setUpClusterer();
 		}
 
-		if (listings.isEmpty()) {
+		if (items.isEmpty()) {
 			return;
 		}
 
-		for (Listing listing : listings) {
-			ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription());
-
+		items.forEach(listing -> {
+			ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getId(), listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription(), listing.getType());
 			clusterManager.addItem(offsetItem);
-			clusterManager.setOnClusterItemClickListener(item -> {
-				map.animateCamera(CameraUpdateFactory.newLatLngZoom(item.getPosition(), 18f));
-				dialog.setState(BottomSheetBehavior.STATE_EXPANDED);
-				binding.logoutCta.setVisibility(View.INVISIBLE);
-				binding.actionsCtaContainer.setVisibility(View.INVISIBLE);
+		});
 
-				Listing currentListing = listings.stream().filter(element -> {
-					assert item.getTitle() != null;
-					return item.getTitle().equals(element.getName());
-				}).findFirst().orElse(null);
+		clusterManager.setOnClusterItemClickListener(item -> {
+			ListingItem currentListingItem = listingsMap.get(item.getId());
 
-				assert currentListing != null;
+			if (currentListingItem == null) {
+				return false;
+			}
 
-				ArrayList<String> arrayList = new ArrayList<>(currentListing.getImageUrls());
-				ImageAdapter adapter = new ImageAdapter(requireContext(), arrayList);
-				adapter.setOnItemClickListener((imageView, path) -> startActivity(new Intent(requireActivity(), ImageViewActivity.class).putExtra("image", path),
-						ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imageView, "image").toBundle()));
-				recyclerView.setAdapter(adapter);
+			User listingUser = currentListingItem.getUser();
 
-				TextView title = binding.getRoot().findViewById(R.id.title);
-				TextView description = binding.getRoot().findViewById(R.id.description);
-				TextView price = binding.getRoot().findViewById(R.id.price);
-				Button buyNowCta = binding.getRoot().findViewById(R.id.buyNow);
-				title.setText(currentListing.getName());
-				description.setText(currentListing.getDescription());
-				String formattedPrice = String.format(getResources().getString(R.string.price_format), currentListing.getCurrency(), currentListing.getPrice());
+			map.animateCamera(CameraUpdateFactory.newLatLngZoom(item.getPosition(), 18f));
+			dialog.setState(BottomSheetBehavior.STATE_EXPANDED);
+			binding.logoutCta.setVisibility(View.INVISIBLE);
+			binding.actionsCtaContainer.setVisibility(View.INVISIBLE);
+
+			ArrayList<String> arrayList = new ArrayList<>(currentListingItem.getImageUrls());
+			ImageAdapter adapter = new ImageAdapter(requireContext(), arrayList);
+			adapter.setOnItemClickListener((imageView, path) -> startActivity(new Intent(requireActivity(), ImageViewActivity.class).putExtra("image", path),
+					ActivityOptions.makeSceneTransitionAnimation(requireActivity(), imageView, "image").toBundle()));
+			recyclerView.setAdapter(adapter);
+
+			TextView title = binding.getRoot().findViewById(R.id.title);
+			TextView description = binding.getRoot().findViewById(R.id.description);
+			TextView price = binding.getRoot().findViewById(R.id.price);
+			TextView userName = binding.getRoot().findViewById(R.id.usernameText);
+//			TextView userAddress = binding.getRoot().findViewById(R.id.userAddress);
+			Button buyOrCellCta = binding.getRoot().findViewById(R.id.buyOrSellCta);
+			CardView buyOrSellChip = binding.getRoot().findViewById(R.id.buyOrSellChip);
+			TextView buyOrSellText = binding.getRoot().findViewById(R.id.buyOrSellChipText);
+
+			buyOrCellCta.setText(currentListingItem.getType() == ListingType.BUY ? R.string.buy : R.string.sell);
+			title.setText(currentListingItem.getName());
+			description.setText(currentListingItem.getDescription());
+			userName.setText(listingUser.getName());
+
+			if (currentListingItem.getType() == ListingType.BUY) {
+				buyOrSellText.setText(R.string.wants_to_sell);
+				buyOrSellChip.setCardBackgroundColor(getResources().getColor(R.color.light_blue_600, null));
+			} else {
+				buyOrSellText.setText(R.string.wants_to_buy);
+				buyOrSellChip.setCardBackgroundColor(getResources().getColor(R.color.light_blue_900, null));
+			}
+
+//			userAddress.setText(listingUser.getAddress() != null ? listingUser.getAddress() : "");
+
+			if (currentListingItem.getType() == ListingType.BUY) {
+				price.setVisibility(View.VISIBLE);
+				String formattedPrice = String.format(getResources().getString(R.string.price_format), currentListingItem.getCurrency(), currentListingItem.getOffer());
 				price.setText(formattedPrice);
+			} else {
+				price.setVisibility(View.GONE);
+			}
 
-				buyNowCta.setOnClickListener(v -> {
-					dialog.setState(STATE_HIDDEN);
-					NavController navController = Navigation.findNavController(v);
+			buyOrCellCta.setOnClickListener(v -> {
+				dialog.setState(STATE_HIDDEN);
+//				NavController navController = Navigation.findNavController(v);
+//
+//				Bundle bundle = new Bundle();
+//				bundle.putString("itemName", currentListingItem.getName());
+//				bundle.putString("username", listingUser.getName());
+//				bundle.putString("price", String.valueOf(currentListingItem.getOffer()));
+//				bundle.putString("currency", currentListingItem.getCurrency());
+//				bundle.putString("sellerId", currentListingItem.getUserId());
+//				bundle.putString("listingId", currentListingItem.getId());
+//
+//				navController.navigate(R.id.action_mapFragment_to_checkoutFragment, bundle);
 
-					Bundle bundle = new Bundle();
-					bundle.putString("itemName", currentListing.getName());
-					bundle.putString("price", String.valueOf(currentListing.getPrice()));
-					bundle.putString("currency", currentListing.getCurrency());
-					bundle.putString("sellerId", currentListing.getUserId());
-					bundle.putString("listingId", currentListing.getId());
+				Request request = new Request();
 
-					navController.navigate(R.id.action_mapFragment_to_checkoutFragment, bundle);
-				});
+				if (currentListingItem.getType() == ListingType.BUY) {
+					request.setBuyerId(currentListingItem.getUserId());
+					request.setSellerId(loginViewModel.getCurrentUser(requireActivity()).getUuid());
+				} else {
+					request.setBuyerId(loginViewModel.getCurrentUser(requireActivity()).getUuid());
+					request.setSellerId(currentListingItem.getUserId());
+				}
 
-				return true;
+				request.setOffer(currentListingItem.getOffer());
+				request.setCreationDate(new Date());
+				request.setState(RequestState.PENDING);
+
+				mapViewModel.addRequest(request, currentListingItem.getId());
+
+				Toast.makeText(requireContext(), "Your requested has been created", Toast.LENGTH_SHORT).show();
 			});
-		}
+
+			return true;
+		});
+	}
+
+	@SuppressLint("PotentialBehaviorOverride")
+	private void setUpClusterer() {
+		// Initialize the manager with the context and the map.
+		clusterManager = new ClusterManager<>(requireContext(), map);
+		CustomClusterRenderer renderer = new CustomClusterRenderer(requireContext(), map, clusterManager);
+
+		clusterManager.setRenderer(renderer);
+		// Point the map's listeners at the listeners implemented by the cluster
+		// manager.
+		map.setOnCameraIdleListener(clusterManager);
+		map.setOnMarkerClickListener(clusterManager);
 	}
 
 }

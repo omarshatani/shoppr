@@ -2,7 +2,9 @@ package com.shoppr.app.data.listing;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
 import com.shoppr.app.data.database.Database;
@@ -39,6 +41,11 @@ public class ListingDatabase extends Database<Listing> {
         dataSource.add(data, id);
     }
 
+	@Override
+	public Task<DocumentSnapshot> get(String id) {
+		return dataSource.get(id);
+	}
+
     @Override
     public void getAll(Callback<ArrayList<Listing>> callback) {
         dataSource.getAll().addOnCompleteListener(task -> {
@@ -57,4 +64,21 @@ public class ListingDatabase extends Database<Listing> {
             }
         });
     }
+
+	@Override
+	public void updateField(String id, String field, Object value) {
+		dataSource.updateField(field, value, id);
+	}
+
+	@Override
+	public void updateArrayField(String id, String field, Object value) {
+		dataSource.updateArrayField(field, value, id);
+	}
+
+	@Override
+	public Task<QuerySnapshot> getAll() {
+		return dataSource.getAll();
+	}
+
+
 }

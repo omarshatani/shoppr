@@ -2,7 +2,9 @@ package com.shoppr.app.data.transaction;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.shoppr.app.data.common.Callback;
 import com.shoppr.app.data.common.Result;
 import com.shoppr.app.data.database.Database;
@@ -56,5 +58,25 @@ public class TransactionDatabase extends Database<Transaction> {
 				callback.onError(task.getException());
 			}
 		});
+	}
+
+	@Override
+	public Task<QuerySnapshot> getAll() {
+		return dataSource.getAll();
+	}
+
+	@Override
+	public Task<DocumentSnapshot> get(String id) {
+		return null;
+	}
+
+	@Override
+	public void updateField(String id, String field, Object value) {
+
+	}
+
+	@Override
+	public void updateArrayField(String id, String field, Object value) {
+
 	}
 }
