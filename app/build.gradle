@@ -7,9 +7,9 @@ plugins {
 }
 
 // Get debug keystore
-def debugKeystore = rootProject.file("debug-keystore.jks")
+def debugKeystore = rootProject.file("keystore/debug-keystore.jks")
 // Get release keystore
-def releaseKeystore = rootProject.file("release-keystore.jks")
+def releaseKeystore = rootProject.file("keystore/release-keystore.jks")
 
 // Initializes a new Properties() object called keystoreProperties.
 def debugKeystoreProperties = new Properties()
@@ -22,13 +22,13 @@ releaseKeystoreProperties.load(new FileInputStream(releaseKeystore))
 android {
     signingConfigs {
         debug {
-            storeFile file('D:\\Development\\2024\\debug-keystore.jks')
+            storeFile file('../keystore/debug-keystore.jks')
             storePassword 'androiddebug'
             keyAlias 'androiddebug'
             keyPassword 'androiddebug'
         }
         release {
-        storeFile file('D:\\Development\\2024\\release-keystore.jks')
+        storeFile file('../keystore/release-keystore.jks')
             storePassword releaseKeystoreProperties['storePassword']
             keyAlias releaseKeystoreProperties['keyAlias']
             keyPassword releaseKeystoreProperties['keyPassword']
