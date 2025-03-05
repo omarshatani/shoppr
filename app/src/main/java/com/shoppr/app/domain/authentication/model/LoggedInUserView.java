@@ -1,4 +1,4 @@
-package com.shoppr.app.domain.login.model;
+package com.shoppr.app.domain.authentication.model;
 
 /**
  * Class exposing authenticated user details to the UI.

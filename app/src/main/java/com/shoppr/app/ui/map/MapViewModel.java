@@ -13,6 +13,8 @@ import com.shoppr.app.data.listing.model.Listing;
 import com.shoppr.app.data.listing.model.ListingItem;
 import com.shoppr.app.data.map.MapRepository;
 import com.shoppr.app.data.request.model.Request;
+import com.shoppr.app.data.user.model.User;
+import com.shoppr.app.domain.authentication.AuthenticationRepository;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,116 +23,117 @@ import java.util.Map;
 import java.util.Random;
 
 public class MapViewModel extends ViewModel {
-	// TODO: Implement the ViewModel
-	private static final double MAX_RADIUS = 100; // meters
-	private final MutableLiveData<GoogleMap> map = new MutableLiveData<>(null);
-	private final MutableLiveData<List<ListingItem>> listings = new MutableLiveData<>(null);
-	private final MutableLiveData<ArrayList<MarkerOptions>> markers = new MutableLiveData<>(null);
-	private final MapRepository mapRepository;
-	private boolean hasInitialised = false;
+    private static final double MAX_RADIUS = 100; // meters
+    private final MutableLiveData<GoogleMap> map = new MutableLiveData<>(null);
+    private final MutableLiveData<List<ListingItem>> listings = new MutableLiveData<>(null);
+    private final MutableLiveData<ArrayList<MarkerOptions>> markers = new MutableLiveData<>(null);
+    private final MapRepository mapRepository;
+    private final AuthenticationRepository authenticationRepository;
 
-	MapViewModel(MapRepository repository) {
-		this.mapRepository = repository;
-	}
+    private boolean hasInitialised = false;
 
-	public LiveData<GoogleMap> getMap() {
-		return map;
-	}
+    MapViewModel(MapRepository mapRepository, AuthenticationRepository authenticationRepository) {
+        this.mapRepository = mapRepository;
+        this.authenticationRepository = authenticationRepository;
+    }
 
-	public void setMap(GoogleMap googleMap) {
-		if (map.getValue() == null) {
-			map.setValue(googleMap);
-		}
-	}
+    public LiveData<GoogleMap> getMap() {
+        return map;
+    }
 
-	public LiveData<List<ListingItem>> getListings() {
-		return listings;
-	}
+    public void setMap(GoogleMap googleMap) {
+        if (map.getValue() == null) {
+            map.setValue(googleMap);
+        }
+    }
 
-	public boolean getHasInitialised() {
-		return hasInitialised;
-	}
+    public LiveData<List<ListingItem>> getListings() {
+        return listings;
+    }
 
-	public void setHasInitialised(boolean value) {
-		this.hasInitialised = value;
-	}
+    public boolean getHasInitialised() {
+        return hasInitialised;
+    }
 
-	public void addListings(List<Listing> listingsArray) {
-		GoogleMap googleMap = map.getValue();
+    public void setHasInitialised(boolean value) {
+        this.hasInitialised = value;
+    }
 
-		for (Listing listing : listingsArray) {
-			Map<String, Object> listingsData = new HashMap<>();
-			listingsData.put("name", listing.getName());
-			listingsData.put("type", listing.getType());
-			listingsData.put("description", listing.getDescription());
-			listingsData.put("userId", listing.getUserId());
-			listingsData.put("imageUrls", listing.getImageUrls());
-			listingsData.put("offer", listing.getOffer());
-			listingsData.put("currency", listing.getCurrency());
-			listingsData.put("requests", listing.getRequests());
-			listingsData.put("state", listing.getState());
+    public void addListings(List<Listing> listingsArray) {
+        GoogleMap googleMap = map.getValue();
 
-			if (googleMap != null) {
-				LatLng randomCoordinate = generateRandomPointNearCoordinates(googleMap.getProjection().getVisibleRegion().latLngBounds);
-				listingsData.put("latitude", randomCoordinate.latitude);
-				listingsData.put("longitude", randomCoordinate.longitude);
-			}
+        for (Listing listing : listingsArray) {
+            Map<String, Object> listingsData = new HashMap<>();
+            listingsData.put("name", listing.getName());
+            listingsData.put("type", listing.getType());
+            listingsData.put("description", listing.getDescription());
+            listingsData.put("userId", listing.getUserId());
+            listingsData.put("imageUrls", listing.getImageUrls());
+            listingsData.put("offer", listing.getOffer());
+            listingsData.put("currency", listing.getCurrency());
+            listingsData.put("requests", listing.getRequests());
+            listingsData.put("state", listing.getState());
 
-			this.addListing(listingsData);
-		}
-	}
+            if (googleMap != null) {
+                LatLng randomCoordinate = generateRandomPointNearCoordinates(googleMap.getProjection().getVisibleRegion().latLngBounds);
+                listingsData.put("latitude", randomCoordinate.latitude);
+                listingsData.put("longitude", randomCoordinate.longitude);
+            }
 
-	private void addListing(Object data) {
-		mapRepository.addListing(data).addOnSuccessListener(unused -> this.retrieveListings());
-	}
+            this.addListing(listingsData);
+        }
+    }
+
+    private void addListing(Object data) {
+        mapRepository.addListing(data).addOnSuccessListener(unused -> this.retrieveListings());
+    }
 
 
-	private void addListing(Object data, Callback<Void> callback) {
-		mapRepository.addListing(data, callback);
-	}
+    private void addListing(Object data, Callback<Void> callback) {
+        mapRepository.addListing(data, callback);
+    }
 
-	public void retrieveListings() {
-//        if (listings.getValue() == null || listings.getValue().isEmpty()) {
-//            mapRepository.getListings(result -> {
-//                assert result != null;
-//                listings.postValue(result.getData());
-//            }, error -> {
-//            });
-//        }
+    public void retrieveListings() {
+        mapRepository.getListings().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<ListingItem> result = task.getResult();
+                listings.postValue(result);
+            } else {
+                // TODO: Manage error cases
+            }
+        });
+    }
 
-		mapRepository.getListings().addOnCompleteListener(task -> {
-			if (task.isSuccessful()) {
-				List<ListingItem> result = task.getResult();
-				listings.postValue(result);
-			} else {
-				// TODO: Manage error cases
-			}
-		});
+    public void addRequest(Request request, String listingId) {
+        mapRepository.addRequest(request, listingId).addOnSuccessListener(unused -> this.retrieveListings());
+    }
 
-	}
+    public User getCurrentUser() {
+        return authenticationRepository.getCurrentUser();
+    }
 
-	public void addRequest(Request request, String listingId) {
-		mapRepository.addRequest(request, listingId).addOnSuccessListener(unused -> this.retrieveListings());
-	}
+    public void logout() {
+        authenticationRepository.logout(null);
+    }
 
-	public LatLng generateRandomPointNearCoordinates(LatLngBounds visibleRegion) {
-		Random random = new Random();
+    public LatLng generateRandomPointNearCoordinates(LatLngBounds visibleRegion) {
+        Random random = new Random();
 
-		double north = visibleRegion.northeast.latitude;
-		double south = visibleRegion.southwest.latitude;
-		double east = visibleRegion.northeast.longitude;
-		double west = visibleRegion.southwest.longitude;
+        double north = visibleRegion.northeast.latitude;
+        double south = visibleRegion.southwest.latitude;
+        double east = visibleRegion.northeast.longitude;
+        double west = visibleRegion.southwest.longitude;
 
-		// Generate a random offset within the radius
-		double randomLat = south + (north - south) * random.nextDouble();
-		double randomLng = west + (east - west) * random.nextDouble();
-		double randomRadius = MAX_RADIUS * Math.sqrt(random.nextDouble());
-		double randomAngle = random.nextDouble() * 2 * Math.PI;
+        // Generate a random offset within the radius
+        double randomLat = south + (north - south) * random.nextDouble();
+        double randomLng = west + (east - west) * random.nextDouble();
+        double randomRadius = MAX_RADIUS * Math.sqrt(random.nextDouble());
+        double randomAngle = random.nextDouble() * 2 * Math.PI;
 
-		double lat = randomLat + randomRadius * Math.cos(randomAngle) / 111111;
-		double lng = randomLng + randomRadius * Math.sin(randomAngle) / (111111 * Math.cos(randomLat));
+        double lat = randomLat + randomRadius * Math.cos(randomAngle) / 111111;
+        double lng = randomLng + randomRadius * Math.sin(randomAngle) / (111111 * Math.cos(randomLat));
 
-		return new LatLng(lat, lng);
-	}
+        return new LatLng(lat, lng);
+    }
 
 }

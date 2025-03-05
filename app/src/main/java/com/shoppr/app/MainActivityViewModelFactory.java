@@ -1,4 +1,4 @@
-package com.shoppr.app.ui.login;
+package com.shoppr.app;
 
 import android.content.Context;
 
@@ -13,32 +13,25 @@ import com.shoppr.app.data.user.UserDatabase;
 import com.shoppr.app.domain.authentication.AuthenticationRepository;
 import com.shoppr.app.domain.storage.CredentialStorage;
 
-/**
- * ViewModel provider factory to instantiate LoginViewModel.
- * Required given LoginViewModel has a non-empty constructor
- */
-public class LoginViewModelFactory implements ViewModelProvider.Factory {
+public class MainActivityViewModelFactory implements ViewModelProvider.Factory {
     private final Context context;
 
-    public LoginViewModelFactory(Context context) {
+    public MainActivityViewModelFactory(Context context) {
         this.context = context;
     }
 
     @NonNull
-    @Override
     @SuppressWarnings("unchecked")
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        if (modelClass.isAssignableFrom(LoginViewModel.class)) {
-            return (T) new LoginViewModel(
+        if (modelClass.isAssignableFrom(MainActivityViewModel.class)) {
+            return (T) new MainActivityViewModel(
                     AuthenticationRepository.getInstance(
                             new AuthenticationDataSource(
                                     FirebaseAuth.getInstance(),
                                     new UserAdapter(),
                                     new CredentialStorage(context)),
                             UserDatabase.getInstance(),
-                            new CredentialStorage(context)
-                    )
-            );
+                            new CredentialStorage(context)));
         } else {
             throw new IllegalArgumentException("Unknown ViewModel class");
         }

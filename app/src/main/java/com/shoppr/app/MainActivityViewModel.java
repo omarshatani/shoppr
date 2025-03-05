@@ -4,16 +4,21 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.shoppr.app.data.user.model.User;
+import com.shoppr.app.domain.authentication.AuthenticationRepository;
 
 public class MainActivityViewModel extends ViewModel {
-    private final MutableLiveData<User> user = new MutableLiveData<>();
+    private final AuthenticationRepository authenticationRepository;
+    private final MutableLiveData<Boolean> isLoggedIn = new MutableLiveData<>();
 
-    public LiveData<User> user() {
-        return user;
+    public MainActivityViewModel(AuthenticationRepository authenticationRepository) {
+        this.authenticationRepository = authenticationRepository;
     }
 
-    public void setUser(User user) {
-        this.user.setValue(user);
+    public LiveData<Boolean> isLoggedIn() {
+        return isLoggedIn;
+    }
+
+    public void checkUserLoginStatus() {
+        isLoggedIn.postValue(this.authenticationRepository.checkUserLoginStatus());
     }
 }

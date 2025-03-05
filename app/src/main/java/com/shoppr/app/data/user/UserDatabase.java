@@ -65,8 +65,8 @@ public class UserDatabase extends Database<User> {
 		return dataSource.getAll();
 	}
 
-	public void update(Map<String, Object> data, String document) {
-		dataSource.update(data, document);
+	public void update(Map<String, Object> data) {
+		dataSource.update(data, DOCUMENT);
 	}
 
 	@Override

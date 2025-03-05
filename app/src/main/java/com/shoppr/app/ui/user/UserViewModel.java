@@ -14,6 +14,6 @@ public class UserViewModel extends ViewModel {
     }
 
     public void updateUser(Map<String, Object> data, String id) {
-        database.update(data, id);
+        database.update(data);
     }
 }

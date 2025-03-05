@@ -27,6 +27,8 @@ import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -35,7 +37,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.maps.android.clustering.ClusterManager;
-import com.shoppr.app.MainActivityViewModel;
 import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.ListingItem;
 import com.shoppr.app.data.listing.model.ListingType;
@@ -49,10 +50,6 @@ import com.shoppr.app.domain.utils.DeviceUtils;
 import com.shoppr.app.domain.utils.ImageAdapter;
 import com.shoppr.app.domain.utils.JsonUtils;
 import com.shoppr.app.ui.carousel.ImageViewActivity;
-import com.shoppr.app.ui.login.LoginViewModel;
-import com.shoppr.app.ui.login.LoginViewModelFactory;
-import com.shoppr.app.ui.user.UserViewModel;
-import com.shoppr.app.ui.user.UserViewModelFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,13 +71,9 @@ public class MapFragment extends Fragment {
 			registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
 			});
 	private MapViewModel mapViewModel;
-	private LoginViewModel loginViewModel;
-	private MainActivityViewModel mainActivityViewModel;
-	private UserViewModel userViewModel;
 	private ClusterManager<ClusterMarkerItem> clusterManager;
 	private GoogleMap map;
 	private FragmentMapBinding binding;
-//	private ArrayList<Listing> listings = new ArrayList<>();
 
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -97,12 +90,7 @@ public class MapFragment extends Fragment {
 					.commit();
 		}
 
-		mapFragment.getMapAsync(googleMap -> {
-			mapViewModel.setMap(googleMap);
-//			if (!this.listings.isEmpty()) {
-//				googleMap.clear();
-//			}
-		});
+		mapFragment.getMapAsync(mapViewModel::setMap);
 
 		return binding.getRoot();
 	}
@@ -110,12 +98,8 @@ public class MapFragment extends Fragment {
 	@Override
 	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		mapViewModel = new ViewModelProvider(this, new MapViewModelFactory())
+		mapViewModel = new ViewModelProvider(this, new MapViewModelFactory(requireActivity()))
 				.get(MapViewModel.class);
-		loginViewModel = new ViewModelProvider(requireActivity(), new LoginViewModelFactory()).get(LoginViewModel.class);
-		userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory()).get(UserViewModel.class);
-		mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
-
 		final Button logoutCta = binding.logoutCta;
 
 		final int screenHeight = DeviceUtils.getScreenHeight(requireContext());
@@ -169,10 +153,15 @@ public class MapFragment extends Fragment {
 		});
 
 		logoutCta.setOnClickListener(v -> {
-			loginViewModel.logout();
-			mainActivityViewModel.setUser(null);
+			mapViewModel.logout();
+			navigateToLoginFragment();
 		});
 
+	}
+
+	private void navigateToLoginFragment() {
+		NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+		navController.navigate(R.id.action_main_to_login);
 	}
 
 	@Override
@@ -201,15 +190,12 @@ public class MapFragment extends Fragment {
 		LocationManager locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
 		userLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-		if (userLocation != null) {
-			LatLng currentUserLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-			User currentUser = loginViewModel.getCurrentUser(requireActivity());
-			Map<String, Object> geoMap = new HashMap<>();
-			geoMap.put("latitude", currentUserLocation.latitude);
-			geoMap.put("longitude", currentUserLocation.longitude);
-			userViewModel.updateUser(geoMap, currentUser.getUuid());
-			map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserLocation, 18f));
+		if (userLocation == null) {
+			return;
 		}
+
+		LatLng currentUserLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+		map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentUserLocation, 18f));
 
 		this.mapViewModel.setHasInitialised(true);
 	}
@@ -230,7 +216,14 @@ public class MapFragment extends Fragment {
 		}
 
 		items.forEach(listing -> {
-			ClusterMarkerItem offsetItem = new ClusterMarkerItem(listing.getId(), listing.getLatitude(), listing.getLongitude(), listing.getName(), listing.getDescription(), listing.getType());
+			ClusterMarkerItem offsetItem = new ClusterMarkerItem(
+					listing.getId(),
+					listing.getLatitude(),
+					listing.getLongitude(),
+					listing.getName(),
+					listing.getDescription(),
+					listing.getType()
+			);
 			clusterManager.addItem(offsetItem);
 		});
 
@@ -301,12 +294,13 @@ public class MapFragment extends Fragment {
 //				navController.navigate(R.id.action_mapFragment_to_checkoutFragment, bundle);
 
 				Request request = new Request();
+				String uuid = mapViewModel.getCurrentUser().getUuid();
 
 				if (currentListingItem.getType() == ListingType.BUY) {
 					request.setBuyerId(currentListingItem.getUserId());
-					request.setSellerId(loginViewModel.getCurrentUser(requireActivity()).getUuid());
+					request.setSellerId(uuid);
 				} else {
-					request.setBuyerId(loginViewModel.getCurrentUser(requireActivity()).getUuid());
+					request.setBuyerId(uuid);
 					request.setSellerId(currentListingItem.getUserId());
 				}
 
@@ -328,10 +322,8 @@ public class MapFragment extends Fragment {
 		// Initialize the manager with the context and the map.
 		clusterManager = new ClusterManager<>(requireContext(), map);
 		CustomClusterRenderer renderer = new CustomClusterRenderer(requireContext(), map, clusterManager);
-
 		clusterManager.setRenderer(renderer);
-		// Point the map's listeners at the listeners implemented by the cluster
-		// manager.
+		// Point the map's listeners at the listeners implemented by the cluster manager.
 		map.setOnCameraIdleListener(clusterManager);
 		map.setOnMarkerClickListener(clusterManager);
 	}

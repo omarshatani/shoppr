@@ -50,7 +50,7 @@ public class CheckoutFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this, new CheckoutViewModelFactory()).get(CheckoutViewModel.class);
-        LoginViewModel loginViewModel = new ViewModelProvider(requireActivity(), new LoginViewModelFactory()).get(LoginViewModel.class);
+        LoginViewModel loginViewModel = new ViewModelProvider(requireActivity(), new LoginViewModelFactory(requireActivity())).get(LoginViewModel.class);
 
         String itemName = CheckoutFragmentArgs.fromBundle(requireArguments()).getItemName();
         String price = CheckoutFragmentArgs.fromBundle(requireArguments()).getPrice();
@@ -131,7 +131,9 @@ public class CheckoutFragment extends Fragment {
                 paymentMethod = new Cash();
             }
 
-            viewModel.buy(listingId, sellerId, loginViewModel.getCurrentUser(requireActivity()).getUuid(), price, currency, paymentMethod, result -> {
+            String uuid = loginViewModel.getUserId();
+
+            viewModel.buy(listingId, sellerId, uuid, price, currency, paymentMethod, result -> {
                 binding.progressBar.setVisibility(View.GONE);
                 Toast toast = new Toast(requireContext());
                 toast.setText("Your order has been placed successfully");

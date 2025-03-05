@@ -1,6 +1,5 @@
 package com.shoppr.app.ui.login;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -21,12 +20,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
-import com.shoppr.app.MainActivityViewModel;
 import com.shoppr.app.R;
 import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentLoginBinding;
@@ -34,11 +34,10 @@ import com.shoppr.app.databinding.FragmentLoginBinding;
 public class LoginFragment extends Fragment {
 
     private LoginViewModel loginViewModel;
-    private MainActivityViewModel mainActivityViewModel;
     private FragmentLoginBinding binding;
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
-				result -> loginViewModel.loginWithGoogle(result.getData(), requireActivity().getSharedPreferences("credentials", Context.MODE_PRIVATE))
+            result -> loginViewModel.loginWithGoogle(result.getData())
     );
     private GoogleSignInClient signInClient;
 
@@ -55,9 +54,8 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
+        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory(requireActivity()))
                 .get(LoginViewModel.class);
-        mainActivityViewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
 
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -98,7 +96,7 @@ public class LoginFragment extends Fragment {
             if (loginResult.getUser() != null) {
                 User user = loginResult.getUser();
                 showToast(String.format("Welcome %s !", user.getName()));
-                mainActivityViewModel.setUser(user);
+                this.navigateToMapFragment();
             }
         });
 
@@ -172,6 +170,11 @@ public class LoginFragment extends Fragment {
                     signOutSuccess,
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void navigateToMapFragment() {
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+        navController.navigate(R.id.action_main_to_map);
     }
 
     @Override

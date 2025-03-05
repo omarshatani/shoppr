@@ -7,28 +7,19 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import com.shoppr.app.data.user.model.User;
-import com.shoppr.app.ui.login.LoginViewModel;
-import com.shoppr.app.ui.login.LoginViewModelFactory;
-
 public class MainActivity extends AppCompatActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
-		MainActivityViewModel viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
-		LoginViewModel loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory()).get(LoginViewModel.class);
-
-		User currentUser = loginViewModel.getCurrentUser(this);
-		viewModel.setUser(currentUser);
-
-		viewModel.user().observe(this, user -> {
-			if (user == null) {
-				navigateToLoginFragment();
-			} else {
+		MainActivityViewModel viewModel = new ViewModelProvider(this, new MainActivityViewModelFactory(this)).get(MainActivityViewModel.class);
+		viewModel.checkUserLoginStatus();
+		viewModel.isLoggedIn().observe(this, isLogged -> {
+			if (isLogged) {
 				navigateToMapFragment();
+			} else {
+				navigateToLoginFragment();
 			}
 		});
 	}
