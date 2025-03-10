@@ -90,7 +90,7 @@ public class MapFragment extends Fragment {
 					.commit();
 		}
 
-		mapFragment.getMapAsync(mapViewModel::setMap);
+		mapFragment.getMapAsync(googleMap -> mapViewModel.setMap(googleMap));
 
 		return binding.getRoot();
 	}
