@@ -36,6 +36,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.android.clustering.ClusterManager;
 import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.ListingItem;
@@ -101,6 +102,7 @@ public class MapFragment extends Fragment {
 		mapViewModel = new ViewModelProvider(this, new MapViewModelFactory(requireActivity()))
 				.get(MapViewModel.class);
 		final Button logoutCta = binding.logoutCta;
+		final FloatingActionButton sellCta = binding.sellCta;
 
 		final int screenHeight = DeviceUtils.getScreenHeight(requireContext());
 
@@ -157,11 +159,18 @@ public class MapFragment extends Fragment {
 			navigateToLoginFragment();
 		});
 
+		sellCta.setOnClickListener(v -> navigateToBuyOverviewFragment());
+
 	}
 
 	private void navigateToLoginFragment() {
 		NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-		navController.navigate(R.id.action_main_to_login);
+		navController.navigate(R.id.action_mapFragment_to_loginFragment);
+	}
+
+	private void navigateToBuyOverviewFragment() {
+		NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+		navController.navigate(R.id.action_mapFragment_to_buyOverviewFragment);
 	}
 
 	@Override

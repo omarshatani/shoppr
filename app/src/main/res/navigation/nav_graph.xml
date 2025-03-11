@@ -26,7 +26,23 @@
         tools:layout="@layout/fragment_map">
         <action
             android:id="@+id/action_mapFragment_to_checkoutFragment"
-            app:destination="@id/checkoutFragment" />
+            app:destination="@id/checkoutFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@anim/fui_slide_in_right"
+            app:popExitAnim="@anim/fui_slide_out_left"
+            app:popUpTo="@id/mapFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_buyOverviewFragment"
+            app:destination="@id/buyOverviewFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out"
+            app:popUpTo="@id/mapFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
     </fragment>
 
     <action
@@ -63,5 +79,10 @@
             android:name="username"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/buyOverviewFragment"
+        android:name="com.shoppr.app.ui.overview.buy.BuyOverviewFragment"
+        android:label="fragment_buy_overview"
+        tools:layout="@layout/fragment_buy_overview" />
 
 </navigation>
