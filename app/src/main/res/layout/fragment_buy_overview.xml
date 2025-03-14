@@ -15,60 +15,33 @@
         android:layout_marginTop="16dp"
         android:text="I would like to"
         android:textColor="@color/material_dynamic_neutral10"
-        android:textSize="42sp"
+        android:textSize="43sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/buy_sell_picker"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginTop="16dp"-->
-    <!--        android:text="buy"-->
-    <!--        android:textColor="@color/material_dynamic_neutral10"-->
-    <!--        android:textSize="42sp"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintHorizontal_bias="0.1"-->
-    <!--        app:layout_constraintStart_toEndOf="@+id/buy_sell_placeholder"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-    <!--    <ImageView-->
-    <!--        android:id="@+id/buy_sell_arrow_down"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginTop="32dp"-->
-    <!--        android:layout_marginEnd="28dp"-->
-    <!--        android:contentDescription="arrow_down"-->
-    <!--        android:src="@drawable/keyboard_arrow_down"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintHeight="30dp"-->
-    <!--        app:layout_constraintLeft_toRightOf="@id/buy_sell_picker"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        app:layout_constraintWidth="30dp" />-->
-
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/buy_sell_menu"
-        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+        style="@style/NoOutlineExposedDropdown"
+        android:background="@color/fui_transparent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="13dp"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/transparent"
-        android:hint=""
+        app:boxBackgroundColor="@color/fui_transparent"
+        app:hintEnabled="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/buy_sell_placeholder"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearance="@style/ShapeAppearance.TransparentNoCut.Rectangular">
+        app:layout_constraintTop_toTopOf="parent">
 
         <AutoCompleteTextView
+            android:backgroundTint="@color/fui_transparent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:inputType="none"
-        />
+            android:textSize="43sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -95,12 +68,13 @@
         app:layout_constraintWidth="match_parent" />
 
     <ImageView
-        android:id="@+id/add_photos_image"
+        android:id="@+id/photos_picker"
         android:layout_width="186dp"
         android:layout_height="153dp"
-        android:layout_marginTop="116dp"
+        android:layout_marginTop="60dp"
         android:src="@drawable/add_photo_alternate_24px"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buy_sell_title" />
 
@@ -109,35 +83,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add photos"
-        app:layout_constraintBottom_toTopOf="@+id/add_photos_image"
+        app:layout_constraintBottom_toTopOf="@+id/photos_picker"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buy_sell_title"
-        app:layout_constraintVertical_bias="0.793" />
+        app:layout_constraintVertical_bias="0.78" />
+
+    <EditText
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="36dp"
+        android:hint="Add a brief description"
+        android:minLines="7"
+        app:layout_constraintBottom_toTopOf="@+id/create_post_cta"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/photos_picker"
+        app:layout_constraintVertical_bias="0.042" />
 
     <Button
         android:id="@+id/create_post_cta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="12dp"
         android:text="Add post"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/buy_sell_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:hint="Add a small description"
-        app:layout_constraintBottom_toTopOf="@+id/create_post_cta"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/add_photos_image"
-        app:layout_constraintVertical_bias="0.482" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

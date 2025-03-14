@@ -8,4 +8,9 @@
     <style name="ShapeAppearance.TransparentNoCut.Rectangular" parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <item name="cornerSize">0dp</item>
     </style>
+
+    <style name="NoOutlineExposedDropdown" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+    </style>
 </resources>

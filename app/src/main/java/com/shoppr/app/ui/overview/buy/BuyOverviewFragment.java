@@ -2,12 +2,17 @@ package com.shoppr.app.ui.overview.buy;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -21,6 +26,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BuyOverviewFragment extends Fragment {
+	// Registers a photo picker activity launcher in multi-select mode.
+	// In this example, the app lets the user select up to 5 media files.
+	ActivityResultLauncher<PickVisualMediaRequest> pickMultipleMedia =
+			registerForActivityResult(new ActivityResultContracts.PickMultipleVisualMedia(5), uris -> {
+				// Callback is invoked after the user selects media items or closes the
+				// photo picker.
+				if (!uris.isEmpty()) {
+					Log.d("PhotoPicker", "Number of items selected: " + uris.size());
+				} else {
+					Log.d("PhotoPicker", "No media selected");
+				}
+			});
 
 	private BuyOverviewViewModel mViewModel;
 	private FragmentBuyOverviewBinding binding;
@@ -41,14 +58,19 @@ public class BuyOverviewFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 		mViewModel = new ViewModelProvider(this, new BuyOverviewViewModelFactory(requireActivity())).get(BuyOverviewViewModel.class);
 
-		TextInputLayout textField = view.findViewById(R.id.buy_sell_menu); // Replace with your actual ID
+		TextInputLayout textField = view.findViewById(R.id.buy_sell_menu);
+		ImageView photoPicker = view.findViewById(R.id.photos_picker);
+
+		photoPicker.setOnClickListener(v -> {
+			pickMultipleMedia.launch(new PickVisualMediaRequest.Builder()
+					.setMediaType(ActivityResultContracts.PickVisualMedia.ImageAndVideo.INSTANCE)
+					.build());
+		});
 
 		// Create the list of items
 		List<String> items = new ArrayList<>();
-		items.add("Item 1");
-		items.add("Item 2");
-		items.add("Item 3");
-		items.add("Item 4");
+		items.add("buy");
+		items.add("sell");
 
 		// Get the context
 		Context context = requireContext();
@@ -61,6 +83,7 @@ public class BuyOverviewFragment extends Fragment {
 			if (textField.getEditText() instanceof AutoCompleteTextView) {
 				AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) textField.getEditText();
 				autoCompleteTextView.setAdapter(adapter);
+				autoCompleteTextView.setText(items.get(0), false);
 			}
 		}
 
