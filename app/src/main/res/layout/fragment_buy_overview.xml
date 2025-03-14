@@ -34,6 +34,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <AutoCompleteTextView
+            android:id="@+id/buy_sell_menu_value"
             android:backgroundTint="@color/fui_transparent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -91,6 +92,7 @@
         app:layout_constraintVertical_bias="0.78" />
 
     <EditText
+        android:id="@+id/buy_sell_description"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -103,6 +105,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/photos_picker"
         app:layout_constraintVertical_bias="0.042" />
+
+    <TextView
+        android:id="@+id/price_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="93dp"
+        android:text="Price"
+        android:textSize="35sp"
+        app:layout_constraintBottom_toTopOf="@+id/create_post_cta"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.023"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buy_sell_description"
+        app:layout_constraintVertical_bias="0.014" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/price"
+        android:layout_width="94dp"
+        android:layout_height="73dp"
+        android:layout_marginBottom="38dp"
+        android:hint="0"
+        app:layout_constraintBottom_toTopOf="@+id/create_post_cta"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.023"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/price_label"
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/create_post_cta"

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -20,10 +21,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.shoppr.app.R;
+import com.shoppr.app.data.listing.model.ListingType;
 import com.shoppr.app.databinding.FragmentBuyOverviewBinding;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BuyOverviewFragment extends Fragment {
 	// Registers a photo picker activity launcher in multi-select mode.
@@ -58,8 +61,9 @@ public class BuyOverviewFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 		mViewModel = new ViewModelProvider(this, new BuyOverviewViewModelFactory(requireActivity())).get(BuyOverviewViewModel.class);
 
-		TextInputLayout textField = view.findViewById(R.id.buy_sell_menu);
-		ImageView photoPicker = view.findViewById(R.id.photos_picker);
+		TextInputLayout textField = binding.buySellMenu;
+		ImageView photoPicker = binding.photosPicker;
+		Button postButton = binding.createPostCta;
 
 		photoPicker.setOnClickListener(v -> {
 			pickMultipleMedia.launch(new PickVisualMediaRequest.Builder()
@@ -68,9 +72,7 @@ public class BuyOverviewFragment extends Fragment {
 		});
 
 		// Create the list of items
-		List<String> items = new ArrayList<>();
-		items.add("buy");
-		items.add("sell");
+		List<String> items = Arrays.stream(ListingType.values()).map(ListingType::getLabel).collect(Collectors.toList());
 
 		// Get the context
 		Context context = requireContext();
@@ -79,13 +81,20 @@ public class BuyOverviewFragment extends Fragment {
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(context, R.layout.list_item, items);
 
 		// Get the EditText from TextInputLayout and set the adapter if it's an AutoCompleteTextView
-		if (textField != null) {
-			if (textField.getEditText() instanceof AutoCompleteTextView) {
-				AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) textField.getEditText();
-				autoCompleteTextView.setAdapter(adapter);
-				autoCompleteTextView.setText(items.get(0), false);
-			}
+		if (textField.getEditText() instanceof AutoCompleteTextView) {
+			AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) textField.getEditText();
+			autoCompleteTextView.setAdapter(adapter);
+			autoCompleteTextView.setText(items.get(0), false);
 		}
+
+		postButton.setOnClickListener((v) -> {
+			ListingType type = binding.buySellMenuValue.getText().toString().equals("buy") ? ListingType.BUY : ListingType.SELL;
+			String title = binding.buySellTitle.getText().toString();
+			String description = binding.buySellDescription.getText().toString();
+			String price = binding.price.getText().toString();
+
+			mViewModel.onPost(type, title, description, price);
+		});
 
 	}
 }
