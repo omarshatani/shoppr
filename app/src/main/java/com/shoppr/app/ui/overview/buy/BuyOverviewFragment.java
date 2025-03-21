@@ -7,9 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
@@ -18,8 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
-import com.google.android.material.textfield.TextInputLayout;
 import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.ListingType;
 import com.shoppr.app.databinding.FragmentBuyOverviewBinding;
@@ -53,6 +50,9 @@ public class BuyOverviewFragment extends Fragment {
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
 													 @Nullable Bundle savedInstanceState) {
 		binding = FragmentBuyOverviewBinding.inflate(inflater, container, false);
+		binding.requestToolbar.setNavigationIcon(R.drawable.ic_back);
+		binding.requestToolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).navigateUp());
+
 		return binding.getRoot();
 	}
 
@@ -61,11 +61,10 @@ public class BuyOverviewFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 		mViewModel = new ViewModelProvider(this, new BuyOverviewViewModelFactory(requireActivity())).get(BuyOverviewViewModel.class);
 
-		TextInputLayout textField = binding.buySellMenu;
-		ImageView photoPicker = binding.photosPicker;
-		Button postButton = binding.createPostCta;
+//		ImageView photoPicker = binding.photosPicker;
+//		Button postButton = binding.createPostCta;
 
-		photoPicker.setOnClickListener(v -> {
+		binding.selectPhotosCta.setOnClickListener(v -> {
 			pickMultipleMedia.launch(new PickVisualMediaRequest.Builder()
 					.setMediaType(ActivityResultContracts.PickVisualMedia.ImageAndVideo.INSTANCE)
 					.build());
@@ -81,20 +80,17 @@ public class BuyOverviewFragment extends Fragment {
 		ArrayAdapter<String> adapter = new ArrayAdapter<>(context, R.layout.list_item, items);
 
 		// Get the EditText from TextInputLayout and set the adapter if it's an AutoCompleteTextView
-		if (textField.getEditText() instanceof AutoCompleteTextView) {
-			AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) textField.getEditText();
-			autoCompleteTextView.setAdapter(adapter);
-			autoCompleteTextView.setText(items.get(0), false);
-		}
+		binding.buySellMenu.setAdapter(adapter);
+		binding.buySellMenu.setText(items.get(0), false);
 
-		postButton.setOnClickListener((v) -> {
-			ListingType type = binding.buySellMenuValue.getText().toString().equals("buy") ? ListingType.BUY : ListingType.SELL;
-			String title = binding.buySellTitle.getText().toString();
-			String description = binding.buySellDescription.getText().toString();
-			String price = binding.price.getText().toString();
-
-			mViewModel.onPost(type, title, description, price);
-		});
+//		postButton.setOnClickListener((v) -> {
+//			ListingType type = binding.buySellMenu.getText().toString().equals("buy") ? ListingType.BUY : ListingType.SELL;
+//			String title = binding.buySellTitle.getText().toString();
+//			String description = binding.buySellDescription.getText().toString();
+//			String price = binding.price.getText().toString();
+//
+//			mViewModel.onPost(type, title, description, price);
+//		});
 
 	}
 }
