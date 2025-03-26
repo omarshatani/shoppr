@@ -131,17 +131,18 @@
                     android:layout_marginBottom="8dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/item_description"
+                    android:id="@+id/item_description_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Add a description">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/item_description"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:lines="5"
+                        android:gravity="top|start"
                         android:inputType="textMultiLine"
-                        android:gravity="top|start" />
+                        android:lines="5" />
                 </com.google.android.material.textfield.TextInputLayout>
 
             </com.google.android.flexbox.FlexboxLayout>
@@ -160,7 +161,7 @@
                     android:textSize="20sp" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/item_offer"
+                    android:id="@+id/item_offer_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="10dp"
@@ -168,6 +169,7 @@
                     android:hint="€">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/item_offer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:inputType="number" />
@@ -182,6 +184,7 @@
             app:justifyContent="center">
 
             <Button
+                android:id="@+id/post_cta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Post" />

@@ -32,12 +32,12 @@ public class ListingBuilder {
         }
 
         public Builder name(String name) {
-            this.id = id;
+            this.name = name;
             return this;
         }
 
         public Builder description(String description) {
-            this.description = id;
+            this.description = description;
             return this;
         }
 
@@ -68,6 +68,21 @@ public class ListingBuilder {
 
         public Builder latitude(double latitude) {
             this.latitude = latitude;
+            return this;
+        }
+
+        public Builder longitude(double longitude) {
+            this.longitude = longitude;
+            return this;
+        }
+
+        public Builder state(ListingState state) {
+            this.state = state;
+            return this;
+        }
+
+        public Builder requests(ArrayList<Request> requests) {
+            this.requests = requests;
             return this;
         }
 

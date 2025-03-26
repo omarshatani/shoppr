@@ -1,6 +1,5 @@
 package com.shoppr.app.ui.overview.buy;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +22,7 @@ import com.shoppr.app.databinding.FragmentBuyOverviewBinding;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BuyOverviewFragment extends Fragment {
@@ -39,7 +39,7 @@ public class BuyOverviewFragment extends Fragment {
 				}
 			});
 
-	private BuyOverviewViewModel mViewModel;
+	private BuyOverviewViewModel viewModel;
 	private FragmentBuyOverviewBinding binding;
 
 	public static BuyOverviewFragment newInstance() {
@@ -59,10 +59,7 @@ public class BuyOverviewFragment extends Fragment {
 	@Override
 	public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-		mViewModel = new ViewModelProvider(this, new BuyOverviewViewModelFactory(requireActivity())).get(BuyOverviewViewModel.class);
-
-//		ImageView photoPicker = binding.photosPicker;
-//		Button postButton = binding.createPostCta;
+		viewModel = new ViewModelProvider(this, new BuyOverviewViewModelFactory(requireActivity())).get(BuyOverviewViewModel.class);
 
 		binding.selectPhotosCta.setOnClickListener(v -> {
 			pickMultipleMedia.launch(new PickVisualMediaRequest.Builder()
@@ -72,25 +69,25 @@ public class BuyOverviewFragment extends Fragment {
 
 		// Create the list of items
 		List<String> items = Arrays.stream(ListingType.values()).map(ListingType::getLabel).collect(Collectors.toList());
-
-		// Get the context
-		Context context = requireContext();
-
+		
 		// Create the ArrayAdapter
-		ArrayAdapter<String> adapter = new ArrayAdapter<>(context, R.layout.list_item, items);
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.list_item, items);
 
 		// Get the EditText from TextInputLayout and set the adapter if it's an AutoCompleteTextView
 		binding.buySellMenu.setAdapter(adapter);
 		binding.buySellMenu.setText(items.get(0), false);
 
-//		postButton.setOnClickListener((v) -> {
-//			ListingType type = binding.buySellMenu.getText().toString().equals("buy") ? ListingType.BUY : ListingType.SELL;
-//			String title = binding.buySellTitle.getText().toString();
-//			String description = binding.buySellDescription.getText().toString();
-//			String price = binding.price.getText().toString();
-//
-//			mViewModel.onPost(type, title, description, price);
-//		});
+		binding.postCta.setOnClickListener((v) -> {
+			ListingType type = binding.buySellMenu.getText().toString().equals("buy") ? ListingType.BUY : ListingType.SELL;
+			String title = Objects.requireNonNull(binding.itemTitle.getText()).toString();
+			String description = Objects.requireNonNull(binding.itemDescription.getText()).toString();
+			String price = Objects.requireNonNull(binding.itemOffer.getText()).toString();
+
+			Log.d("DESCRIPTION", description);
+			Log.d("TITLE", title);
+
+			viewModel.onPost(type, title, description, price);
+		});
 
 	}
 }
