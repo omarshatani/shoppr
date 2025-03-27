@@ -78,6 +78,7 @@ public class AuthenticationRepository implements IAuthenticationRepository {
             loginTask.addOnCompleteListener(result -> {
                 if (result.isSuccessful()) {
                     User user = result.getResult();
+
                     callback.onSuccess(new Result.Success<>(user));
                 } else {
                     callback.onError(result.getException());

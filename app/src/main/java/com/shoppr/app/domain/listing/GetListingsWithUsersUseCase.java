@@ -57,7 +57,6 @@ public class GetListingsWithUsersUseCase {
 							.map(listing -> {
 								// Get the corresponding user for the listing
 								User user = userMap.get(listing.getUserId());
-
 								// Create a ListingItem object with combined data
 								return new ListingItem(listing.getId(), user, listing.getName(), listing.getDescription(), listing.getType(), listing.getUserId(), listing.getImageUrls(), listing.getOffer(), listing.getCurrency(), listing.getLatitude(), listing.getLongitude(), listing.getState(), listing.getRequests());
 							})

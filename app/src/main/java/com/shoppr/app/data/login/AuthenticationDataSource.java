@@ -61,8 +61,8 @@ public class AuthenticationDataSource {
                 .continueWith(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser firebaseUser = task.getResult().getUser();
+
                         assert firebaseUser != null;
-                        // Adapt the user here
                         return userAdapter.adaptUserFromFirebaseUser(firebaseUser);
                     } else {
                         throw task.getException();

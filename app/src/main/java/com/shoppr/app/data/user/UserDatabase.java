@@ -71,16 +71,16 @@ public class UserDatabase extends Database<User> {
 
 	@Override
 	public Task<DocumentSnapshot> get(String id) {
-		return null;
+		return dataSource.get(id);
 	}
 
 	@Override
 	public void updateField(String id, String field, Object value) {
-
+		dataSource.updateField(field, value, DOCUMENT);
 	}
 
 	@Override
 	public void updateArrayField(String id, String field, Object value) {
-
+		dataSource.updateArrayField(field, value, DOCUMENT);
 	}
 }

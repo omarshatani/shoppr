@@ -1,5 +1,7 @@
 package com.shoppr.app.domain.user;
 
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.shoppr.app.data.login.AuthenticationDataSource;
 import com.shoppr.app.data.user.UserDatabase;
 import com.shoppr.app.data.user.model.User;
@@ -26,7 +28,19 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public User getCurrentUser() {
-        return authenticationDataSource.getUser();
+        User user = authenticationDataSource.getUser();
+        Task<DocumentSnapshot> userTask = userDatabase.get(user.getUuid());
+
+        userTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot snapshot = task.getResult();
+                user.setEmail(snapshot.getString("email"));
+                user.setLatitude(snapshot.getDouble("latitude"));
+                user.setLongitude(snapshot.getDouble("longitude"));
+            }
+        });
+
+        return user;
     }
 
     @Override

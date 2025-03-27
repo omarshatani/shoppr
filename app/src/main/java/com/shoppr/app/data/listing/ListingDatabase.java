@@ -53,9 +53,9 @@ public class ListingDatabase extends Database<Listing> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     if (document.exists()) {
-											Listing listing = document.toObject(Listing.class);
-											listing.setId(document.getId());
-											elements.add(listing);
+                        Listing listing = document.toObject(Listing.class);
+                        listing.setId(document.getId());
+                        elements.add(listing);
                     }
                 }
                 callback.onSuccess(new Result.Success<>(elements));

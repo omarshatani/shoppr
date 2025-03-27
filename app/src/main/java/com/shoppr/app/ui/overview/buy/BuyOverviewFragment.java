@@ -18,6 +18,7 @@ import androidx.navigation.Navigation;
 
 import com.shoppr.app.R;
 import com.shoppr.app.data.listing.model.ListingType;
+import com.shoppr.app.data.user.model.User;
 import com.shoppr.app.databinding.FragmentBuyOverviewBinding;
 
 import java.util.Arrays;
@@ -67,6 +68,8 @@ public class BuyOverviewFragment extends Fragment {
 					.build());
 		});
 
+		User currentUser = viewModel.getCurrentUser();
+
 		// Create the list of items
 		List<String> items = Arrays.stream(ListingType.values()).map(ListingType::getLabel).collect(Collectors.toList());
 		
@@ -85,8 +88,9 @@ public class BuyOverviewFragment extends Fragment {
 
 			Log.d("DESCRIPTION", description);
 			Log.d("TITLE", title);
+			Log.d("UUID", currentUser.getUuid());
 
-			viewModel.onPost(type, title, description, price);
+			viewModel.onPost(currentUser.getUuid(), type, title, description, price, currentUser.getLatitude(), currentUser.getLongitude());
 		});
 
 	}
